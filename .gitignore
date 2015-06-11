@@ -1,0 +1,17 @@
+asus-xubuntu-venv
+LLvenv
+outputs
+results
+realdataresults
+build
+dist
+magicresults
+mlmldata
+runLotsData
+runLotsDataMLML
+sc-nn-results
+sc-rbf-results
+vcdata
+*.pyc
+*.pyo
+*~
