@@ -392,7 +392,7 @@ def getChangeInClassifier(tasks, state, classifier, accuracy, task,
         nextLabelProbs = calcBayesProbability(
             [0,0], accuracy, classifier.predict_proba(task)[0])
 
-    """
+    
     print "-Normal-"
     if task in state:
         print state[task]
@@ -410,9 +410,9 @@ def getChangeInClassifier(tasks, state, classifier, accuracy, task,
     print sum(i != j for i,j in zip(predictedLabels0, predictedLabels1))
     print sum(i != j for i,j in zip(predictedLabels0, currentLabels))
     print sum(i != j for i,j in zip(predictedLabels1, currentLabels))
-    print sum(i != j for i,j in zip(predictedLabelsTest, currentLabels))
-    print sum(i != j for i,j in zip(predictedLabelsTest, predictedLabels0))
-    print sum(i != j for i,j in zip(predictedLabelsTest, predictedLabels1))
+    #print sum(i != j for i,j in zip(predictedLabelsTest, currentLabels))
+    #print sum(i != j for i,j in zip(predictedLabelsTest, predictedLabels0))
+    #print sum(i != j for i,j in zip(predictedLabelsTest, predictedLabels1))
 
     
     #for t in trainingDict.keys():
@@ -420,23 +420,23 @@ def getChangeInClassifier(tasks, state, classifier, accuracy, task,
     print len(trainingTasks)
     print len(trainingTasks0)
     print len(trainingTasks1)
-    print len(trainingTasksTest)
+    #print len(trainingTasksTest)
     print len(trainingLabels)
     print len(trainingLabels0)
     print len(trainingLabels1)
-    print len(trainingLabelsTest)
+    #print len(trainingLabelsTest)
 
     print trainingTasks == trainingTasks0
     #    if tempState0[t][0] != tempState0[t][1]:
     print trainingTasks == trainingTasks1
     #    if tempState0[t][0] != tempState0[t][1]:
-    print trainingTasks == trainingTasksTest
+   # print trainingTasks == trainingTasksTest
     print trainingTasks0 == trainingTasks1
     print trainingLabels == trainingLabels0
     #    if tempState0[t][0] != tempState0[t][1]:
     print trainingLabels == trainingLabels1
     #    if tempState0[t][0] != tempState0[t][1]:
-    print trainingLabels == trainingLabelsTest        
+    #print trainingLabels == trainingLabelsTest        
     print trainingLabels0 == trainingLabels1
     print nextLabelProbs
 
@@ -446,7 +446,7 @@ def getChangeInClassifier(tasks, state, classifier, accuracy, task,
     print changeInClassifier0
     print changeInClassifier1
     print changeBetweenClassifiers
-    """
+    
     expectedChange = (
         (((nextLabelProbs[0] * accuracy) + 
          (nextLabelProbs[1] * (1.0-accuracy))) *

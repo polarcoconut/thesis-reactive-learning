@@ -26,6 +26,7 @@ from samplingMethodClasses import *
 from math import sqrt, floor
 from data.makedata import makeGaussianData, makeTriGaussianData, makeLogicalData, makeUniformData
 from data.makedataClasses import uniformData, gaussianData, realData
+from ordereddict import OrderedDict
 
 import cProfile, pstats, StringIO
 
@@ -59,8 +60,8 @@ print 0.5 * (1.0 + (1.0 - d) ** gamma)
 #f = open('data/hv.data', 'r') #100 features
 #f = open('data/hvnoise.data', 'r') #100 features
 #f = open('data/ad-formatted.data', 'r') #1558 features
-f = open('data/arrhythmia2.data', 'r') #279 features
-#f = open('data/musk.data', 'r') #166 features
+#f = open('data/arrhythmia2.data', 'r') #279 features
+f = open('data/musk.data', 'r') #166 features
 #f = open('data/madelon.data', 'r') #500 features
 #f = open('data/gisette.data', 'r') #5000 features
 #f = open('data/adrandom.data', 'r') #6558 features
@@ -78,12 +79,12 @@ f = open('data/arrhythmia2.data', 'r') #279 features
 #f = open('data/cmc.data', 'r') #9 attributes, 3 classes
 #f = open('data/sensor_readings_24.data', 'r') #24 attributes, 4 classes
 
-realDataName = 'arr7'
-numFeatures = 279
+realDataName = 'm7'
+numFeatures = 166
 numClasses = 2
 #budget = 1000
 budget = int(sum(1 for line in f) / 2.0)
-numberOfSimulations = 10
+numberOfSimulations = 1
 
 
 instances = []
@@ -112,7 +113,7 @@ samplingStrategies = [uncertaintySamplingAlpha(0.1),
 #samplingStrategies = [cvSampling()]
 #samplingStrategies = [cvSamplingBatch()]
 #samplingStrategies = [passive()]
-#samplingStrategies = [impactSampling()]
+samplingStrategies = [impactSampling()]
 #samplingStrategies = [impactSampling(optimism=True)]
 #samplingStrategies = [impactSampling(optimism=True, pseudolookahead = True)]
 #samplingStrategies = [uncertaintySampling()]
@@ -138,7 +139,7 @@ samplingStrategies = [impactSampling(),
 """
 
 
-
+"""
 neighbor = impactSampling(optimism=True, pseudolookahead=True,
                           strategies = 
                           [uncertaintySampling(),
@@ -148,7 +149,7 @@ neighbor = impactSampling(optimism=True, pseudolookahead=True,
                            uncertaintySamplingAlpha(0.5),
                            uncertaintySamplingAlpha(0.7),
                            uncertaintySamplingAlpha(0.9)])
-
+"""
 
 """
 neighbor = randomSampling(strategies = 
@@ -161,7 +162,7 @@ neighbor = randomSampling(strategies =
                            uncertaintySamplingAlpha(0.9)])
 """
 
-
+"""
 samplingStrategies = [impactSampling(),
                       impactSampling(optimism = True),
                       impactSampling(pseudolookahead = True),
@@ -171,7 +172,7 @@ samplingStrategies = [impactSampling(),
                       uncertaintySamplingAlpha(0.5),
                       passive(),
                       neighbor]
-
+"""
 
 
 #samplingStrategies = [neighbor]
@@ -264,7 +265,8 @@ for numSim in range(0, numberOfSimulations):
     #state = [(0,0) for i in range(len(trainingTasks))]
     #state = [[0 for i in range(numClasses)] for j in range(len(trainingTasks))]
     #Let's seed the classifier with some labels
-    state = {-1 : budget}
+    #state = {-1 : budget}
+    state = OrderedDict([(-1, budget)])
     #state5 = deepcopy(state)
     #state.append(budget)
     #state5.append(-1)

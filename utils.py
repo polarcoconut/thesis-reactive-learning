@@ -164,10 +164,10 @@ def retrain(labels, classifier,
             if goldLabels != None:
                 subsetGoldLabels.append(goldLabels[i])
 
-            #trainingLabels.append(np.argmax(votes))
-            #trainingTasks.append(task)
-            #trainingWeights.append(1.0)
-            trainingDict[task] = np.argmax(votes)
+            trainingLabels.append(np.argmax(votes))
+            trainingTasks.append(task)
+            trainingWeights.append(1.0)
+            #trainingDict[task] = np.argmax(votes)
         
         """
         if np.argmax(votes) == 1:
@@ -197,14 +197,14 @@ def retrain(labels, classifier,
     #print len(trainingTasks)
     
     #DONT DO THIS IN REAL LIFE
-    trainingTasks = []
-    trainingLabels = []
-    trainingWeights = []
-    items = sorted(trainingDict.items())
-    for (task, label) in items:
-        trainingTasks.append(task)
-        trainingLabels.append(label)
-        trainingWeights.append(1.0)
+    #trainingTasks = []
+    #trainingLabels = []
+    #trainingWeights = []
+    #items = sorted(trainingDict.items())
+    #for (task, label) in items:
+    #    trainingTasks.append(task)
+    #    trainingLabels.append(label)
+    #    trainingWeights.append(1.0)
 
     classifier.retrain(trainingTasks, trainingLabels, trainingWeights)
     #classifier.retrain(trainingTasks, trainingLabels)
