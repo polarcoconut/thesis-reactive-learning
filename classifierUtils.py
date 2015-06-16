@@ -4,6 +4,7 @@ from numpy import dot, linalg
 from numpy.random import randint
 from utils import *
 from copy import deepcopy
+from ordereddict import OrderedDict
 
 
 #this removes the example and then adds it back in.
@@ -248,7 +249,8 @@ def getChangeInClassifierMax(tasks, state, classifier, accuracy, index):
     return maxChange
 
 def getChangeInClassifier(tasks, state, classifier, accuracy, task,
-                          optimism = False, pseudolookahead= False):
+                          optimism = False, pseudolookahead= False,
+                          numBootstrapSamples = 0):
     
     changeInClassifier0 = 0.0
     changeInClassifier1 = 0.0
@@ -338,7 +340,7 @@ def getChangeInClassifier(tasks, state, classifier, accuracy, task,
             predictedLabels1 = predictedLabels11
     """
 
-    print "START RETRAINING"
+    #print "START RETRAINING"
 
     if predictedLabels0 == None:
         (trainingTasks0, trainingLabels0) = retrain(tempState0, classifier, True, accuracy)
@@ -385,14 +387,44 @@ def getChangeInClassifier(tasks, state, classifier, accuracy, task,
     if optimism:
         return max(changeInClassifier0, changeInClassifier1)
 
-    if task in state:
-        nextLabelProbs = calcBayesProbability(
-            state[task], accuracy, classifier.predict_proba(task)[0])
-    else:
-        nextLabelProbs = calcBayesProbability(
-            [0,0], accuracy, classifier.predict_proba(task)[0])
 
-    
+    if numBootstrapSamples != 0:
+        priorSamples = []
+        nonActiveTasks = state.keys()
+        nonActiveTasks.remove(-1)
+        baseStrategyChange = 0.0
+        for numBootstrapSample in range(numBootstrapSamples): 
+            bootstrapSampleTasks = sample(nonActiveTasks, 
+                                          len(nonActiveTasks) / 2)
+            bootstrapSampleState = OrderedDict(
+                [(k, state[k]) for k in bootstrapSampleTasks])
+            retrain(bootstrapSampleState, classifier, True, accuracy)
+            priorSamples.append(classifier.predict_proba(task)[0])
+
+    else:
+        priorSamples = [classifier.predict_proba(task)[0]]
+
+    expectedChange = 0.0    
+    for priors in priorSamples:
+
+        if task in state:
+            nextLabelProbs = calcBayesProbability(
+                state[task], accuracy, priors)
+        else:
+            nextLabelProbs = calcBayesProbability(
+                [0,0], accuracy, priors)
+
+        expectedChange += (
+            (((nextLabelProbs[0] * accuracy) + 
+              (nextLabelProbs[1] * (1.0-accuracy))) *
+             changeInClassifier0) + 
+            (((nextLabelProbs[1] * accuracy) +
+              (nextLabelProbs[0] * (1.0-accuracy)))* 
+             changeInClassifier1))
+
+    expectedChange /= len(priors)
+
+    """
     print "-Normal-"
     if task in state:
         print state[task]
@@ -446,14 +478,7 @@ def getChangeInClassifier(tasks, state, classifier, accuracy, task,
     print changeInClassifier0
     print changeInClassifier1
     print changeBetweenClassifiers
-    
-    expectedChange = (
-        (((nextLabelProbs[0] * accuracy) + 
-         (nextLabelProbs[1] * (1.0-accuracy))) *
-        changeInClassifier0) + 
-        (((nextLabelProbs[1] * accuracy) +
-         (nextLabelProbs[0] * (1.0-accuracy)))* 
-        changeInClassifier1))
+    """
 
     return expectedChange
 

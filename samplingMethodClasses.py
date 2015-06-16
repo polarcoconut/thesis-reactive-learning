@@ -3,6 +3,7 @@ from utils import *
 from classifierUtils import *
 from math import exp, floor
 from random import sample, randint
+from ordereddict import OrderedDict
 
 class samplingMethod:
     def __init__(self):
@@ -52,11 +53,15 @@ class uncertaintySamplingLabeled(samplingMethod):
 
 
 class impactSampling(samplingMethod):
+
+    #bootstrap should never be used with optimism
     def __init__(self, optimism=False, pseudolookahead=False,
+                 numBootstrapSamples = 0,
                  strategies = [uncertaintySampling(), 
                                uncertaintySamplingLabeled()]):
         self.optimism = optimism
         self.pseudolookahead = pseudolookahead
+        self.numBootstrapSamples = numBootstrapSamples
         self.baseStrategies = strategies
         self.outputString = ""
 
@@ -79,10 +84,16 @@ class impactSampling(samplingMethod):
                 return 'impactPriorOPT(%d)' % len(self.baseStrategies)
         else:
             if self.pseudolookahead:
-                return 'impactPriorPL(%d)' % len(self.baseStrategies)
+                if self.numBootstrapSamples == 0:
+                    return 'impactPriorPL(%d)' % len(self.baseStrategies)
+                else:
+                    return 'impactPriorBOOPL(%d)' % len(self.baseStrategies)
             else:
-                return 'impactPrior(%d)' % len(self.baseStrategies)
-
+                if self.numBootstrapSamples == 0:
+                    return 'impactPrior(%d)' % len(self.baseStrategies)
+                else:
+                    return 'impactPriorBOO(%d)' % len(self.baseStrategies)
+                    
     def sample(self, dataGenerator, state, classifier, accuracy):
 
         tasks = dataGenerator.trainingTasks
@@ -97,14 +108,18 @@ class impactSampling(samplingMethod):
             baseStrategyTask = baseStrategy.sample(
                 dataGenerator, state, classifier, accuracy)
 
+
             if baseStrategyTask in tasks:                
                 baseStrategyChange = getChangeInClassifier(
-                    allTasks, state, classifier, accuracy, baseStrategyTask)
+                    allTasks, state, classifier, accuracy, baseStrategyTask,
+                    numBootstrapSamples = self.numBootstrapSamples)
             else:
                 baseStrategyChange = getChangeInClassifier(
                     allTasks, state, classifier, accuracy, baseStrategyTask,
                     optimism = self.optimism, 
-                    pseudolookahead = self.pseudolookahead)
+                    pseudolookahead = self.pseudolookahead,
+                    numBootstrapSamples = self.numBootstrapSamples)
+
 
             print baseStrategy.getName()
             print baseStrategyChange
