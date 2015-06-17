@@ -55,7 +55,7 @@ print 0.5 * (1.0 + (1.0 - d) ** gamma)
 #f = open('data/iris.data', 'r') #4 features
 #f = open('data/eegeyestate.data', 'r') #14 features 
 #f = open('data/seismicbumps.data', 'r') #18 features
-f = open('data/wdbc-formatted.data', 'r') #30 features
+#f = open('data/wdbc-formatted.data', 'r') #30 features
 #f = open('data/sonar.data', 'r') #60 features
 #f = open('data/hv.data', 'r') #100 features
 #f = open('data/hvnoise.data', 'r') #100 features
@@ -79,11 +79,11 @@ f = open('data/wdbc-formatted.data', 'r') #30 features
 #f = open('data/cmc.data', 'r') #9 attributes, 3 classes
 #f = open('data/sensor_readings_24.data', 'r') #24 attributes, 4 classes
 
-realDataName = 'bcd7'
-numFeatures = 30
+realDataName = 'g7R'
+numFeatures = 90
 numClasses = 2
-#budget = 1000
-budget = int(sum(1 for line in f) / 2.0)
+budget = 1000
+#budget = int(sum(1 for line in f) / 2.0)
 numberOfSimulations = 10
 
 
@@ -116,6 +116,7 @@ samplingStrategies = [uncertaintySamplingAlpha(0.1),
 #samplingStrategies = [impactSampling()]
 #samplingStrategies = [impactSampling(numBootstrapSamples = 10)]
 #samplingStrategies = [impactSampling(optimism=True)]
+samplingStrategies = [impactSampling(optimism=True, symmetric = True)]
 #samplingStrategies = [impactSampling(optimism=True, pseudolookahead = True)]
 #samplingStrategies = [uncertaintySampling()]
 #samplingStrategies = [uncertaintySamplingRelabel(3),
@@ -140,7 +141,7 @@ samplingStrategies = [impactSampling(),
 """
 
 
-
+"""
 neighbor = impactSampling(optimism=True, pseudolookahead=True,
                           strategies = 
                           [uncertaintySampling(),
@@ -150,7 +151,7 @@ neighbor = impactSampling(optimism=True, pseudolookahead=True,
                            uncertaintySamplingAlpha(0.5),
                            uncertaintySamplingAlpha(0.7),
                            uncertaintySamplingAlpha(0.9)])
-
+"""
 
 """
 random = randomSampling(strategies = 
@@ -163,7 +164,7 @@ random = randomSampling(strategies =
                            uncertaintySamplingAlpha(0.9)])
 """
 
-
+"""
 samplingStrategies = [impactSampling(),
                       impactSampling(optimism = True),
                       impactSampling(pseudolookahead = True),
@@ -173,7 +174,7 @@ samplingStrategies = [impactSampling(),
                       uncertaintySamplingAlpha(0.5),
                       passive(),
                       neighbor]
-
+"""
 
 
 #samplingStrategies = [neighbor]
@@ -187,8 +188,8 @@ activeLearningExamples = 50
 
 
 #dataGenerator = uniformData(budget*2, numFeatures)
-#dataGenerator = gaussianData(budget*2, numFeatures)
-dataGenerator = realData(budget * 2, numFeatures, f, realDataName)
+dataGenerator = gaussianData(budget*2, numFeatures)
+#dataGenerator = realData(budget * 2, numFeatures, f, realDataName)
     
 files = []
 statfiles = []

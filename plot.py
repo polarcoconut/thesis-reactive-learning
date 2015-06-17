@@ -429,10 +429,10 @@ for feature in features:
     #    open(
     #        'outputs/g7/impactPriorExpectedExpectedMax2-f%d-lr-g1.0-1000-250' % feature, 'r'))
 
-    files.append(
-        open(
-            'outputs/%s/impactPriorBOO(2)-f%d-lr-g1.0-%d-250' % 
-            (foldername, feature,budget), 'r'))
+    #files.append(
+    #    open(
+    #        'outputs/%s/impactPriorBOO(2)-f%d-lr-g1.0-%d-250' % 
+    #        (foldername, feature,budget), 'r'))
 
     files.append(
         open(
@@ -485,7 +485,6 @@ for feature in features:
     #files.append(open('outputs/g7/unc-r3-f%d-lr-g1.0-1000-250' % feature, 
     #                  'r'))
     makePlot(files, ['impactEXP',
-                     'impactBOO',
                      'impactOPT',
                      'impactPLOPT',
                      'impactPLOPT(7)',

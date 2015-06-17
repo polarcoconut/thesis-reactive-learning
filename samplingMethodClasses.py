@@ -54,13 +54,13 @@ class uncertaintySamplingLabeled(samplingMethod):
 
 class impactSampling(samplingMethod):
 
-    #bootstrap should never be used with optimism
     def __init__(self, optimism=False, pseudolookahead=False,
-                 numBootstrapSamples = 0,
+                 numBootstrapSamples = 0, symmetric = False,
                  strategies = [uncertaintySampling(), 
                                uncertaintySamplingLabeled()]):
         self.optimism = optimism
         self.pseudolookahead = pseudolookahead
+        self.symmetric = symmetric
         self.numBootstrapSamples = numBootstrapSamples
         self.baseStrategies = strategies
         self.outputString = ""
@@ -77,11 +77,29 @@ class impactSampling(samplingMethod):
         self.outputString = ""
 
     def getName(self):
+        baseName = 'impactPrior'
+        if self.numBootstrapSamples != 0:
+            baseName += 'BOO'
+        if self.pseudolookahead:
+            baseName += 'PL'
+        if self.optimism:
+            baseName += 'OPT'
+        if self.symmetric:
+            baseName += '-S'
+        baseName += '(%d)' % len(self.baseStrategies)
+
+        """
         if self.optimism:
             if self.pseudolookahead:
-                return 'impactPriorPLOPT(%d)' % len(self.baseStrategies)
+                if self.numBootstrapSamples == 0:
+                    return 'impactPriorPLOPT(%d)' % len(self.baseStrategies)
+                else:
+                    return 'impactPriorBOOPLOPT(%d)' % len(self.baseStrategies)
             else:
-                return 'impactPriorOPT(%d)' % len(self.baseStrategies)
+                if self.numBootstrapSamples == 0:
+                    return 'impactPriorOPT(%d)' % len(self.baseStrategies)
+                else:
+                    return 'impactPriorBOOOPT(%d)' % len(self.baseStrategies)
         else:
             if self.pseudolookahead:
                 if self.numBootstrapSamples == 0:
@@ -93,7 +111,7 @@ class impactSampling(samplingMethod):
                     return 'impactPrior(%d)' % len(self.baseStrategies)
                 else:
                     return 'impactPriorBOO(%d)' % len(self.baseStrategies)
-                    
+        """
     def sample(self, dataGenerator, state, classifier, accuracy):
 
         tasks = dataGenerator.trainingTasks
@@ -109,10 +127,17 @@ class impactSampling(samplingMethod):
                 dataGenerator, state, classifier, accuracy)
 
 
-            if baseStrategyTask in tasks:                
-                baseStrategyChange = getChangeInClassifier(
-                    allTasks, state, classifier, accuracy, baseStrategyTask,
-                    numBootstrapSamples = self.numBootstrapSamples)
+            if baseStrategyTask in tasks:
+                if self.symmetric:
+                    baseStrategyChange = getChangeInClassifier(
+                        allTasks, state, classifier, accuracy, baseStrategyTask,
+                        optimism = self.optimism, 
+                        pseudolookahead = self.pseudolookahead,
+                        numBootstrapSamples = self.numBootstrapSamples)
+                else:
+                    baseStrategyChange = getChangeInClassifier(
+                        allTasks, state, classifier, accuracy, baseStrategyTask,
+                        numBootstrapSamples = self.numBootstrapSamples)
             else:
                 baseStrategyChange = getChangeInClassifier(
                     allTasks, state, classifier, accuracy, baseStrategyTask,
