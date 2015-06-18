@@ -88,6 +88,8 @@ class impactSampling(samplingMethod):
             baseName += '-S'
         baseName += '(%d)' % len(self.baseStrategies)
 
+        return baseName
+
         """
         if self.optimism:
             if self.pseudolookahead:
@@ -197,6 +199,76 @@ class impactSampling(samplingMethod):
             self.lastLabelIndex = ALIndex
             return tasks[ALIndex]
         """
+
+class impactSamplingAll(samplingMethod):
+
+    def __init__(self, optimism=False, pseudolookahead=False,
+                 numBootstrapSamples = 0, symmetric = False):
+        self.optimism = optimism
+        self.pseudolookahead = pseudolookahead
+        self.symmetric = symmetric
+        self.numBootstrapSamples = numBootstrapSamples
+
+    def reinit(self):
+        pass
+
+    def getName(self):
+        baseName = 'impactPrior'
+        if self.numBootstrapSamples != 0:
+            baseName += 'BOO'
+        if self.pseudolookahead:
+            baseName += 'PL'
+        if self.optimism:
+            baseName += 'OPT'
+        if self.symmetric:
+            baseName += '-S'
+        baseName += '(*)'
+
+        return baseName
+
+    def sample(self, dataGenerator, state, classifier, accuracy):
+
+        tasks = dataGenerator.trainingTasks
+        nonActiveTasks = state.keys()
+        nonActiveTasks.remove(-1)
+        allTasks = tasks + nonActiveTasks
+
+        bestTasks = []
+        bestChange = 0
+        for task in allTasks:
+            if task in tasks:
+                if self.symmetric:
+                    baseStrategyChange = getChangeInClassifier(
+                        allTasks, state, classifier, accuracy, task,
+                        optimism = self.optimism, 
+                        pseudolookahead = self.pseudolookahead,
+                        numBootstrapSamples = self.numBootstrapSamples)
+                else:
+                    baseStrategyChange = getChangeInClassifier(
+                        allTasks, state, classifier, accuracy, task,
+                        numBootstrapSamples = self.numBootstrapSamples)
+            else:
+                baseStrategyChange = getChangeInClassifier(
+                    allTasks, state, classifier, accuracy, task,
+                    optimism = self.optimism, 
+                    pseudolookahead = self.pseudolookahead,
+                    numBootstrapSamples = self.numBootstrapSamples)
+
+
+            #print baseStrategyChange
+            #if task in state:
+            #    print state[task]
+            
+            if baseStrategyChange > bestChange:
+                bestTasks = [task]
+                bestChange = baseStrategyChange
+            elif baseStrategyChange == bestChange:
+                bestTasks.append(task)
+            else:
+                continue
+
+        nextTask = sample(bestTasks,1)[0]
+        return nextTask
 
 class passive(samplingMethod):
 

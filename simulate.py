@@ -84,7 +84,7 @@ numFeatures = 90
 numClasses = 2
 budget = 1000
 #budget = int(sum(1 for line in f) / 2.0)
-numberOfSimulations = 10
+numberOfSimulations = 2
 
 
 instances = []
@@ -114,9 +114,10 @@ samplingStrategies = [uncertaintySamplingAlpha(0.1),
 #samplingStrategies = [cvSamplingBatch()]
 #samplingStrategies = [passive()]
 #samplingStrategies = [impactSampling()]
+samplingStrategies = [impactSamplingAll()]
 #samplingStrategies = [impactSampling(numBootstrapSamples = 10)]
 #samplingStrategies = [impactSampling(optimism=True)]
-samplingStrategies = [impactSampling(optimism=True, symmetric = True)]
+#samplingStrategies = [impactSampling(optimism=True, symmetric = True)]
 #samplingStrategies = [impactSampling(optimism=True, pseudolookahead = True)]
 #samplingStrategies = [uncertaintySampling()]
 #samplingStrategies = [uncertaintySamplingRelabel(3),
