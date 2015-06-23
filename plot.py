@@ -369,7 +369,7 @@ hues = ['#b3cde3', '#8c96c6', '#8856a7', '#810f7c', '#000000']
 
 
 #features = [10,30,50,70,90]
-features = [90]
+features = [30]
 budget = 1000
 foldername = 'g7R'
 
@@ -429,15 +429,20 @@ for feature in features:
     #    open(
     #        'outputs/g7/impactPriorExpectedExpectedMax2-f%d-lr-g1.0-1000-250' % feature, 'r'))
 
-    #files.append(
-    #    open(
-    #        'outputs/%s/impactPriorBOO(2)-f%d-lr-g1.0-%d-250' % 
-    #        (foldername, feature,budget), 'r'))
+    files.append(
+        open(
+            'outputs/%s/impactPriorBOO(2)-f%d-lr-g1.0-%d-250' % 
+            (foldername, feature,budget), 'r'))
 
     files.append(
         open(
             'outputs/%s/impactPriorOPT(2)-f%d-lr-g1.0-%d-250' % 
             (foldername, feature,budget), 'r'))
+    files.append(
+        open(
+            'outputs/%s/impactPriorOPT-S(2)-f%d-lr-g1.0-%d-250' % 
+            (foldername, feature,budget), 'r'))
+
     #files.append(
     #    open(
     #        'outputs/%s/impactPriorPL(2)-f%d-lr-g1.0-%d-250' % 
@@ -445,6 +450,10 @@ for feature in features:
     files.append(
         open(
             'outputs/%s/impactPriorPLOPT(2)-f%d-lr-g1.0-%d-250' % 
+            (foldername, feature,budget), 'r'))
+    files.append(
+        open(
+            'outputs/%s/impactPriorPLOPT-S(2)-f%d-lr-g1.0-%d-250' % 
             (foldername, feature,budget), 'r'))
     files.append(
         open(
@@ -485,8 +494,11 @@ for feature in features:
     #files.append(open('outputs/g7/unc-r3-f%d-lr-g1.0-1000-250' % feature, 
     #                  'r'))
     makePlot(files, ['impactEXP',
+                     'impactBOO',
                      'impactOPT',
+                     'impactOPT-S',
                      'impactPLOPT',
+                     'impactPLOPT-S',
                      'impactPLOPT(7)',
                      r'$US_{X_U}$',
                      r'$US^{0.5}_{X}$',

@@ -64,6 +64,8 @@ class impactSampling(samplingMethod):
         self.numBootstrapSamples = numBootstrapSamples
         self.baseStrategies = strategies
         self.outputString = ""
+        self.lastLookaheadLength = 1
+        self.currentLookaheadLength = 1
 
     def reinit(self):
         #self.optimism = self.optimism
@@ -75,6 +77,8 @@ class impactSampling(samplingMethod):
         self.logFile.write(self.outputString)
         self.logFile.write("\n")
         self.outputString = ""
+        self.lastLookaheadLength = 1
+        self.currentLookaheadLength = 1
 
     def getName(self):
         baseName = 'impactPrior'
@@ -128,9 +132,17 @@ class impactSampling(samplingMethod):
             baseStrategyTask = baseStrategy.sample(
                 dataGenerator, state, classifier, accuracy)
 
-
+            #If we are getting a NEW task
             if baseStrategyTask in tasks:
                 if self.symmetric:
+                    if self.pseudolookahead:
+                        retrain(state, classifier, True, accuracy)
+                        currentLabels = classifier.predict(tasks)
+                        baseStrategyChange = doUnlabeledLookahead(
+                            tasks, baseStrategyTask, state, classifier, 
+                            baseStrategy, dataGenerator, currentLabels,
+                            accuracy, self.lastLookaheadLength,
+                            optimism = self.optimism)
                     baseStrategyChange = getChangeInClassifier(
                         allTasks, state, classifier, accuracy, baseStrategyTask,
                         optimism = self.optimism, 
@@ -141,6 +153,10 @@ class impactSampling(samplingMethod):
                         allTasks, state, classifier, accuracy, baseStrategyTask,
                         numBootstrapSamples = self.numBootstrapSamples)
             else:
+                currentLookaheadLength = (max(state[baseStrategyTask]) -
+                                            min(state[baseStrategyTask])) + 1
+                if currentLookaheadLength > self.currentLookaheadLength:
+                    self.currentLookaheadLength = currentLookaheadLength
                 baseStrategyChange = getChangeInClassifier(
                     allTasks, state, classifier, accuracy, baseStrategyTask,
                     optimism = self.optimism, 
@@ -160,7 +176,9 @@ class impactSampling(samplingMethod):
                 bestTasks.append((strategyNumber, baseStrategyTask))
             else:
                 continue
-
+                
+        self.lastLookaheadLength = self.currentLookaheadLength
+        self.currentLookaheadLength = 1
         print "Best tasks"
         print [x for (x,y)  in bestTasks]
         (nextStrategyNumber, nextTask) = sample(bestTasks,1)[0]

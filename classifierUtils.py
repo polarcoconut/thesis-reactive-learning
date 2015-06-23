@@ -248,6 +248,78 @@ def getChangeInClassifierMax(tasks, state, classifier, accuracy, index):
     maxChange = max(changeInClassifier0, changeInClassifier1)
     return maxChange
 
+#returns the impact after adding k points
+def doUnlabeledLookahead(tasks, task, state, classifier, baseStrategy,
+                         dataGenerator, currentLabels, accuracy, k,
+                         optimism = False):
+    
+    tempState0 = deepcopy(state)
+    tempState1 = deepcopy(state)
+
+    tempState0[task] = [0,0]
+    tempState1[task] = [0,0]
+    tempState0[task][0] += 1
+    tempState1[task][1] += 1
+
+    (trainingTasks0, trainingLabels0) = retrain(tempState0, 
+                                                classifier, True, accuracy)
+
+    nextTask0 = baseStrategy.sample(dataGenerator, tempState0, 
+                                    classifier, accuracy)
+    (trainingTasks1, trainingLabels1) = retrain(tempState1, 
+                                                classifier, True, accuracy)
+    predictedLabels0 = classifier.predict(tasks)
+
+    nextTask1 = baseStrategy.sample(dataGenerator, tempState1, 
+                                    classifier, accuracy)
+    predictedLabels1 = classifier.predict(tasks)
+    nextLabelProbs = classifier.predict_proba(task)[0]
+
+    if k == 0:
+        changeInClassifier0 = 0.0
+        changeInClassifier1 = 0.0
+        for (predictedLabel0, predictedLabel1, label) in zip(predictedLabels0,
+                                                             predictedLabels1,
+                                                             currentLabels):
+            if not predictedLabel0 == label:
+                changeInClassifier0 += 1.0
+            if not predictedLabel1 == label:
+                changeInClassifier1 += 1.0
+
+        if optimism:
+            expectedChange = max(changeInClassifier0, changeInClassifier1)
+        else:
+            expectedChange = (
+                (((nextLabelProbs[0] * accuracy) + 
+                  (nextLabelProbs[1] * (1.0-accuracy))) *
+                 changeInClassifier0) + 
+                (((nextLabelProbs[1] * accuracy) +
+                  (nextLabelProbs[0] * (1.0-accuracy)))* 
+                 changeInClassifier1))
+    else:
+        if optimism:
+            expectedChange = max(doUnlabeledLookahead(
+                tasks, nextTask0, tempState0, 
+                classifier, baseStrategy, dataGenerator, 
+                currentLabels, accuracy, k-1),
+             doUnlabeledLookahead(tasks, nextTask1, tempState1, 
+                                  classifier, baseStrategy, dataGenerator, 
+                                  currentLabels, accuracy, k-1))
+        else:
+            expectedChange = (
+                (((nextLabelProbs[0] * accuracy) + 
+                  (nextLabelProbs[1] * (1.0-accuracy))) *
+                 doUnlabeledLookahead(tasks, nextTask0, tempState0, 
+                                      classifier, baseStrategy, dataGenerator, 
+                                      currentLabels, accuracy, k-1)) + 
+                (((nextLabelProbs[1] * accuracy) +
+                  (nextLabelProbs[0] * (1.0-accuracy)))* 
+                 doUnlabeledLookahead(tasks, nextTask1, tempState1, 
+                                      classifier, baseStrategy, dataGenerator, 
+                                      currentLabels, accuracy, k-1)))
+
+    return expectedChange
+
 def getChangeInClassifier(tasks, state, classifier, accuracy, task,
                           optimism = False, pseudolookahead= False,
                           numBootstrapSamples = 0):
@@ -268,8 +340,7 @@ def getChangeInClassifier(tasks, state, classifier, accuracy, task,
     #currentNotLabel = 1 - currentLabel
 
     if pseudolookahead and task in state:
-        #print "DOING THE PSEUDO"
-        numAdditionalLabels = abs(state[task][0] - state[task][1]) + 1
+            numAdditionalLabels = abs(state[task][0] - state[task][1]) + 1 
     else:
         #print "NOT THE WOODO"
         numAdditionalLabels = 1
@@ -283,62 +354,6 @@ def getChangeInClassifier(tasks, state, classifier, accuracy, task,
 
     predictedLabels0 = None
     predictedLabels1 = None
-    """
-    #HERE BEGINS THE PART WHERE WE DO MAX OF TIES
-    if tempState0[index][0] == tempState0[index][1]:
-        tempState0[index][0] += 1
-        retrain(tasks, tempState0, classifier, 
-                True, accuracy)
-        predictedLabels00 = classifier.predict(tasks)
-        
-        tempState0[index][0] -= 1
-        tempState0[index][1] += 1
-        retrain(tasks, tempState0, classifier, 
-                True, accuracy)
-        predictedLabels01 = classifier.predict(tasks)
-
-        changeInClassifier00 = 0.0
-        changeInClassifier01 = 0.0
-
-        for (predictedLabel00, predictedLabel01, label) in zip(
-                predictedLabels00, predictedLabels01, currentLabels):
-            if not predictedLabel00 == label:
-                changeInClassifier00 += 1.0
-            if not predictedLabel01 == label:
-                changeInClassifier01 += 1.0
-        
-        if changeInClassifier00 > changeInClassifier01:
-            predictedLabels0 = predictedLabels00
-        else:
-            predictedLabels0 = predictedLabels01
-
-    if tempState1[index][0] == tempState1[index][1]:
-        tempState1[index][0] += 1
-        retrain(tasks, tempState1, classifier, 
-                True, accuracy)
-        predictedLabels10 = classifier.predict(tasks)
-        
-        tempState1[index][0] -= 1
-        tempState1[index][1] += 1
-        retrain(tasks, tempState1, classifier, 
-                True, accuracy)
-        predictedLabels11 = classifier.predict(tasks)
-
-        changeInClassifier10 = 0.0
-        changeInClassifier11 = 0.0
-
-        for (predictedLabel10, predictedLabel11, label) in zip(
-                predictedLabels10, predictedLabels11, currentLabels):
-            if not predictedLabel10 == label:
-                changeInClassifier10 += 1.0
-            if not predictedLabel11 == label:
-                changeInClassifier11 += 1.0
-        
-        if changeInClassifier10 > changeInClassifier11:
-            predictedLabels1 = predictedLabels10
-        else:
-            predictedLabels1 = predictedLabels11
-    """
 
     #print "START RETRAINING"
 
