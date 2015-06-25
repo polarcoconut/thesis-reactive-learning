@@ -248,6 +248,56 @@ def getChangeInClassifierMax(tasks, state, classifier, accuracy, index):
     maxChange = max(changeInClassifier0, changeInClassifier1)
     return maxChange
 
+
+def doUnlabeledPseudoLookahead(tasks, task, state, classifier, baseStrategy,
+                         dataGenerator, accuracy, k,
+                         optimism = False):
+    
+    tempState0 = deepcopy(state)
+    tempState1 = deepcopy(state)
+
+    tempState0[task] = [0,0,k]
+    tempState1[task] = [0,0,k]
+    tempState0[task][0] += 1
+    tempState1[task][1] += 1
+
+    retrain(state, classifier, True, accuracy)
+    nextLabelProbs = classifier.predict_proba(task)[0]
+    currentLabels = classifier.predict(tasks)
+
+    (trainingTasks0, trainingLabels0) = retrain(tempState0, 
+                                                classifier, True, accuracy)
+
+    predictedLabels0 = classifier.predict(tasks)
+
+    (trainingTasks1, trainingLabels1) = retrain(tempState1, 
+                                                classifier, True, accuracy)
+    predictedLabels1 = classifier.predict(tasks)
+
+
+    changeInClassifier0 = 0.0
+    changeInClassifier1 = 0.0
+    for (predictedLabel0, predictedLabel1, label) in zip(predictedLabels0,
+                                                         predictedLabels1,
+                                                         currentLabels):
+        if not predictedLabel0 == label:
+            changeInClassifier0 += 1.0
+        if not predictedLabel1 == label:
+            changeInClassifier1 += 1.0
+            
+    if optimism:
+        expectedChange = max(changeInClassifier0, changeInClassifier1)
+    else:
+        expectedChange = (
+            (((nextLabelProbs[0] * accuracy) + 
+              (nextLabelProbs[1] * (1.0-accuracy))) *
+             changeInClassifier0) + 
+            (((nextLabelProbs[1] * accuracy) +
+              (nextLabelProbs[0] * (1.0-accuracy)))* 
+             changeInClassifier1))
+        
+    return expectedChange
+
 #returns the impact after adding k points
 def doUnlabeledLookahead(tasks, task, state, classifier, baseStrategy,
                          dataGenerator, currentLabels, accuracy, k,
@@ -261,19 +311,24 @@ def doUnlabeledLookahead(tasks, task, state, classifier, baseStrategy,
     tempState0[task][0] += 1
     tempState1[task][1] += 1
 
+    retrain(state, classifier, True, accuracy)
+    nextLabelProbs = classifier.predict_proba(task)[0]
+
     (trainingTasks0, trainingLabels0) = retrain(tempState0, 
                                                 classifier, True, accuracy)
 
     nextTask0 = baseStrategy.sample(dataGenerator, tempState0, 
                                     classifier, accuracy)
+    predictedLabels0 = classifier.predict(tasks)
+
     (trainingTasks1, trainingLabels1) = retrain(tempState1, 
                                                 classifier, True, accuracy)
-    predictedLabels0 = classifier.predict(tasks)
 
     nextTask1 = baseStrategy.sample(dataGenerator, tempState1, 
                                     classifier, accuracy)
     predictedLabels1 = classifier.predict(tasks)
-    nextLabelProbs = classifier.predict_proba(task)[0]
+
+    #print optimism
 
     if k == 0:
         changeInClassifier0 = 0.0
@@ -301,22 +356,22 @@ def doUnlabeledLookahead(tasks, task, state, classifier, baseStrategy,
             expectedChange = max(doUnlabeledLookahead(
                 tasks, nextTask0, tempState0, 
                 classifier, baseStrategy, dataGenerator, 
-                currentLabels, accuracy, k-1),
+                currentLabels, accuracy, k-1, optimism),
              doUnlabeledLookahead(tasks, nextTask1, tempState1, 
                                   classifier, baseStrategy, dataGenerator, 
-                                  currentLabels, accuracy, k-1))
+                                  currentLabels, accuracy, k-1, optimism))
         else:
             expectedChange = (
                 (((nextLabelProbs[0] * accuracy) + 
                   (nextLabelProbs[1] * (1.0-accuracy))) *
                  doUnlabeledLookahead(tasks, nextTask0, tempState0, 
                                       classifier, baseStrategy, dataGenerator, 
-                                      currentLabels, accuracy, k-1)) + 
+                                      currentLabels, accuracy, k-1, optimism)) + 
                 (((nextLabelProbs[1] * accuracy) +
                   (nextLabelProbs[0] * (1.0-accuracy)))* 
                  doUnlabeledLookahead(tasks, nextTask1, tempState1, 
                                       classifier, baseStrategy, dataGenerator, 
-                                      currentLabels, accuracy, k-1)))
+                                      currentLabels, accuracy, k-1, optimism)))
 
     return expectedChange
 

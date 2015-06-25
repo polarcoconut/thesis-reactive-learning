@@ -125,10 +125,10 @@ def retrain(labels, classifier,
             continue
         if votes[0] == votes[1]: 
             continue
-        if votes[0] + votes[1] > 50:
-            print "Retraining"
-            print votes
-            print np.argmax(votes)
+        #if votes[0] + votes[1] > 50:
+        #    print "Retraining"
+        #    print votes
+        #    print np.argmax(votes)
         #print "Another task"
         #print votes
         #if bayesOptimal:
@@ -164,9 +164,15 @@ def retrain(labels, classifier,
             if goldLabels != None:
                 subsetGoldLabels.append(goldLabels[i])
 
-            trainingLabels.append(np.argmax(votes))
-            trainingTasks.append(task)
-            trainingWeights.append(1.0)
+            if len(votes) > 2:
+                for k in range(votes[2]):
+                    trainingLabels.append(np.argmax(votes))
+                    trainingTasks.append(task)
+                    trainingWeights.append(1.0)
+            else:
+                trainingLabels.append(np.argmax(votes))
+                trainingTasks.append(task)
+                trainingWeights.append(1.0)
             #trainingDict[task] = np.argmax(votes)
         
         """

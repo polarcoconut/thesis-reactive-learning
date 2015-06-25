@@ -369,7 +369,7 @@ hues = ['#b3cde3', '#8c96c6', '#8856a7', '#810f7c', '#000000']
 
 
 #features = [10,30,50,70,90]
-features = [30]
+features = [90]
 budget = 1000
 foldername = 'g7R'
 

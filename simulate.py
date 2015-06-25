@@ -80,7 +80,7 @@ print 0.5 * (1.0 + (1.0 - d) ** gamma)
 #f = open('data/sensor_readings_24.data', 'r') #24 attributes, 4 classes
 
 realDataName = 'g7R'
-numFeatures = 90
+numFeatures = 30
 numClasses = 2
 budget = 1000
 #budget = int(sum(1 for line in f) / 2.0)

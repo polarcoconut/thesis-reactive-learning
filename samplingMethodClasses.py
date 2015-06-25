@@ -135,19 +135,21 @@ class impactSampling(samplingMethod):
             #If we are getting a NEW task
             if baseStrategyTask in tasks:
                 if self.symmetric:
-                    if self.pseudolookahead:
-                        retrain(state, classifier, True, accuracy)
-                        currentLabels = classifier.predict(tasks)
-                        baseStrategyChange = doUnlabeledLookahead(
-                            tasks, baseStrategyTask, state, classifier, 
-                            baseStrategy, dataGenerator, currentLabels,
-                            accuracy, self.lastLookaheadLength,
-                            optimism = self.optimism)
                     baseStrategyChange = getChangeInClassifier(
-                        allTasks, state, classifier, accuracy, baseStrategyTask,
+                        allTasks, state, classifier, 
+                        accuracy, baseStrategyTask,
                         optimism = self.optimism, 
                         pseudolookahead = self.pseudolookahead,
                         numBootstrapSamples = self.numBootstrapSamples)
+                    if baseStrategyChange == 0  and self.pseudolookahead:
+                        print "DOING UNLABELED LOOKAHEAD"
+                        baseStrategyChange = doUnlabeledPseudoLookahead(
+                            tasks, baseStrategyTask, state, classifier, 
+                            baseStrategy, dataGenerator,
+                            accuracy, self.lastLookaheadLength,
+                            optimism = self.optimism)
+                        baseStrategyChange /= self.lastLookaheadLength
+
                 else:
                     baseStrategyChange = getChangeInClassifier(
                         allTasks, state, classifier, accuracy, baseStrategyTask,
