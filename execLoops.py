@@ -81,8 +81,13 @@ def learn(numRelabels, state, dataGenerator,
             sampledIndices.append('r')
 
         if nextTask in dataGenerator.trainingTasks:
-            dataGenerator.trainingTasks.remove(nextTask)
+            dataGenerator.trainingTasks = filter(
+                lambda a: a != nextTask, dataGenerator.trainingTasks)
+            #dataGenerator.trainingTasks.remove(nextTask)
         nextClass = dataGenerator.trainingTaskClasses[nextTask]
+        if isinstance(nextClass, list):
+            nextClass  = sample(nextClass, 1)[0]
+
         dataGenerator.replenish()
 
         #if index in activeTaskIndices:

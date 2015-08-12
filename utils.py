@@ -29,6 +29,14 @@ def computeStats(allVotes):
 
     return ([], numExamplesRelabeled, numTimesRelabeled)
 
+def calcExpectedError(tasks, classifier):
+    predictions = classifier.predict_proba(tasks)
+    expectedError = 0.0
+    for prediction in predictions:
+        expectedError += 2.0 * prediction[0] * prediction[1]
+    
+    return expectedError
+    
 #Computes the probability of the label given the votes
 def calcBayesProbability(votes, accuracy, prior=[0.5,0.5]):
     """

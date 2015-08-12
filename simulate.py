@@ -25,7 +25,7 @@ from samplingMethodClasses import *
 
 from math import sqrt, floor
 from data.makedata import makeGaussianData, makeTriGaussianData, makeLogicalData, makeUniformData
-from data.makedataClasses import uniformData, gaussianData, realData
+from data.makedataClasses import uniformData, gaussianData, realData, relationExtractionData
 from ordereddict import OrderedDict
 
 import cProfile, pstats, StringIO
@@ -42,8 +42,8 @@ if len(sys.argv) > 1:
 #budget = 350
 #let's assume all workers and difficulties are the same for now
 # Accuracies: 55: 3.3, 65: 1.7, 75: 1.0, 85: 0.5, 95: 0.15
-gamma = 1.0
-#gamma = 0.0
+#gamma = 1.0
+gamma = 0.0
 d = 0.5
 
 print "Accuracy of the workers:"
@@ -80,9 +80,9 @@ print 0.5 * (1.0 + (1.0 - d) ** gamma)
 #f = open('data/sensor_readings_24.data', 'r') #24 attributes, 4 classes
 
 realDataName = 'g7R'
-numFeatures = 30
+numFeatures = 90
 numClasses = 2
-budget = 1000
+budget = 100
 #budget = int(sum(1 for line in f) / 2.0)
 numberOfSimulations = 10
 
@@ -120,8 +120,10 @@ samplingStrategies = [uncertaintySamplingAlpha(0.1),
 #samplingStrategies = [impactSampling(optimism=True, symmetric = True)]
 #samplingStrategies = [impactSampling(optimism=True, pseudolookahead = True)]
 #samplingStrategies = [impactSampling(pseudolookahead = True, symmetric = True)]
-samplingStrategies = [impactSampling(pseudolookahead = True, optimism = True,
-                                     symmetric = True)]
+#samplingStrategies = [impactSampling(pseudolookahead = True, optimism = True,
+#                                     symmetric = True)]
+#samplingStrategies = [impactSampling(pseudolookahead = True, optimism = True,
+#                                     symmetric = True, getLastItemLabeled=True)]
 
 #samplingStrategies = [uncertaintySampling()]
 #samplingStrategies = [uncertaintySamplingRelabel(3),
@@ -134,7 +136,7 @@ samplingStrategies = [impactSampling(pseudolookahead = True, optimism = True,
 #                      uncertaintySampling()]
 
 #samplingStrategies = [bayesianUncertaintySampling()]
-
+#samplingStrategies = [DTVOISampling()]
 
 """
 samplingStrategies = [impactSampling(),
@@ -146,7 +148,7 @@ samplingStrategies = [impactSampling(),
 """
 
 
-"""
+
 neighbor = impactSampling(optimism=True, pseudolookahead=True,
                           strategies = 
                           [uncertaintySampling(),
@@ -156,7 +158,7 @@ neighbor = impactSampling(optimism=True, pseudolookahead=True,
                            uncertaintySamplingAlpha(0.5),
                            uncertaintySamplingAlpha(0.7),
                            uncertaintySamplingAlpha(0.9)])
-"""
+
 
 """
 random = randomSampling(strategies = 
@@ -181,6 +183,12 @@ samplingStrategies = [impactSampling(),
                       neighbor]
 """
 
+samplingStrategies = [impactSampling(optimism = True),
+                      impactSampling(optimism=True, 
+                                     pseudolookahead=True),
+                      uncertaintySampling(),
+                      passive()]
+
 
 #samplingStrategies = [neighbor]
 #samplingStrategies = [uncertaintySamplingRelabel(5)]
@@ -193,9 +201,12 @@ activeLearningExamples = 50
 
 
 #dataGenerator = uniformData(budget*2, numFeatures)
-dataGenerator = gaussianData(budget*2, numFeatures)
+#dataGenerator = gaussianData(budget*2, numFeatures)
 #dataGenerator = realData(budget * 2, numFeatures, f, realDataName)
-    
+
+dataGenerator = relationExtractionData(budget*2, numFeatures = 1, 
+                                       relInd = 0, pruningThres = 50)
+
 files = []
 statfiles = []
 folderName = dataGenerator.getName()

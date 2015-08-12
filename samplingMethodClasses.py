@@ -56,6 +56,7 @@ class impactSampling(samplingMethod):
 
     def __init__(self, optimism=False, pseudolookahead=False,
                  numBootstrapSamples = 0, symmetric = False,
+                 getLastItemLabeled = False,
                  strategies = [uncertaintySampling(), 
                                uncertaintySamplingLabeled()]):
         self.optimism = optimism
@@ -67,12 +68,20 @@ class impactSampling(samplingMethod):
         self.lastLookaheadLength = 1
         self.currentLookaheadLength = 1
 
+        self.getLastItemLabeled = getLastItemLabeled
+        self.lastItemLabeled = None
+        if self.getLastItemLabeled:
+            self.baseStrategies.append('lastLabeled')
+
     def reinit(self):
         #self.optimism = self.optimism
         #self.pseudolookahead = self.pseudolookahead
         #self.baseStrategies = self.baseStrategies
         #self.__init__(self.optimism, self.pseudolookahead, self.baseStrategies)
         for baseStrategy in self.baseStrategies:
+            if baseStrategy == 'lastLabeled':
+                self.lastItemLabeled = None
+                continue
             baseStrategy.reinit()
         self.logFile.write(self.outputString)
         self.logFile.write("\n")
@@ -94,30 +103,6 @@ class impactSampling(samplingMethod):
 
         return baseName
 
-        """
-        if self.optimism:
-            if self.pseudolookahead:
-                if self.numBootstrapSamples == 0:
-                    return 'impactPriorPLOPT(%d)' % len(self.baseStrategies)
-                else:
-                    return 'impactPriorBOOPLOPT(%d)' % len(self.baseStrategies)
-            else:
-                if self.numBootstrapSamples == 0:
-                    return 'impactPriorOPT(%d)' % len(self.baseStrategies)
-                else:
-                    return 'impactPriorBOOOPT(%d)' % len(self.baseStrategies)
-        else:
-            if self.pseudolookahead:
-                if self.numBootstrapSamples == 0:
-                    return 'impactPriorPL(%d)' % len(self.baseStrategies)
-                else:
-                    return 'impactPriorBOOPL(%d)' % len(self.baseStrategies)
-            else:
-                if self.numBootstrapSamples == 0:
-                    return 'impactPrior(%d)' % len(self.baseStrategies)
-                else:
-                    return 'impactPriorBOO(%d)' % len(self.baseStrategies)
-        """
     def sample(self, dataGenerator, state, classifier, accuracy):
 
         tasks = dataGenerator.trainingTasks
@@ -129,11 +114,27 @@ class impactSampling(samplingMethod):
         bestChange = 0
         for (strategyNumber, baseStrategy) in zip(
                 range(len(self.baseStrategies)), self.baseStrategies):
-            baseStrategyTask = baseStrategy.sample(
-                dataGenerator, state, classifier, accuracy)
+            if baseStrategy == 'lastLabeled':
+                if self.lastItemLabeled == None:
+                    continue
+                baseStrategyTask = self.lastItemLabeled
+            else:
+                baseStrategyTask = baseStrategy.sample(
+                    dataGenerator, state, classifier, accuracy)
 
-            #If we are getting a NEW task
-            if baseStrategyTask in tasks:
+            #If we are getting an OLD task
+            if baseStrategyTask in nonActiveTasks:
+                currentLookaheadLength = (max(state[baseStrategyTask]) -
+                                            min(state[baseStrategyTask])) + 1
+                if currentLookaheadLength > self.currentLookaheadLength:
+                    self.currentLookaheadLength = currentLookaheadLength
+                baseStrategyChange = getChangeInClassifier(
+                    allTasks, state, classifier, accuracy, baseStrategyTask,
+                    optimism = self.optimism, 
+                    pseudolookahead = self.pseudolookahead,
+                    numBootstrapSamples = self.numBootstrapSamples)
+
+            else:
                 if self.symmetric:
                     baseStrategyChange = getChangeInClassifier(
                         allTasks, state, classifier, 
@@ -154,19 +155,9 @@ class impactSampling(samplingMethod):
                     baseStrategyChange = getChangeInClassifier(
                         allTasks, state, classifier, accuracy, baseStrategyTask,
                         numBootstrapSamples = self.numBootstrapSamples)
-            else:
-                currentLookaheadLength = (max(state[baseStrategyTask]) -
-                                            min(state[baseStrategyTask])) + 1
-                if currentLookaheadLength > self.currentLookaheadLength:
-                    self.currentLookaheadLength = currentLookaheadLength
-                baseStrategyChange = getChangeInClassifier(
-                    allTasks, state, classifier, accuracy, baseStrategyTask,
-                    optimism = self.optimism, 
-                    pseudolookahead = self.pseudolookahead,
-                    numBootstrapSamples = self.numBootstrapSamples)
 
 
-            print baseStrategy.getName()
+            print baseStrategy
             print baseStrategyChange
             if baseStrategyTask in state:
                 print state[baseStrategyTask]
@@ -186,6 +177,7 @@ class impactSampling(samplingMethod):
         (nextStrategyNumber, nextTask) = sample(bestTasks,1)[0]
         print nextStrategyNumber
         self.outputString += ("%f\t" % nextStrategyNumber)
+        self.lastItemLabeled = nextTask
         return nextTask
 
         """
@@ -307,6 +299,7 @@ class passive(samplingMethod):
         #return activeTaskIndices.pop(-1)
         return sample(dataGenerator.trainingTasks, 1)[0]
 
+#This is not passive. This is randomly choosing between two points.
 class randomSampling(samplingMethod):
 
     def __init__(self, 
@@ -569,4 +562,106 @@ class uncertaintySamplingAlphaRelabel(samplingMethod):
         """
 
         return nextTaskIndex
+
+
+class DTVOISampling(samplingMethod):
+    """
+    def __init__(self, allData = False,
+                 strategies = [uncertaintySampling(), 
+                               passive(), passive(), 
+                               passive(), passive(),
+                               passive(), passive()]):
+    """
+
+    """
+    def __init__(self, allData = False,
+                 strategies = [uncertaintySampling(),
+                               uncertaintySamplingLabeled()]):
+    """
+    
+    def __init__(self, allData = False,
+                 strategies = [uncertaintySampling(),
+                               uncertaintySamplingLabeled(),
+                               uncertaintySamplingAlpha(0.1),
+                               uncertaintySamplingAlpha(0.3),
+                               uncertaintySamplingAlpha(0.5),
+                               uncertaintySamplingAlpha(0.7),
+                               uncertaintySamplingAlpha(0.9)]):
+    
+
+        self.allData = allData
+        self.baseStrategies = strategies
+
+    def reinit(self):
+        pass
+
+    def getName(self):
+        return 'dtvoi-r(7)'
+
+    def sample(self, dataGenerator, state, classifier, accuracy):
+
+        tasks = dataGenerator.trainingTasks
+        nonActiveTasks = state.keys()
+        nonActiveTasks.remove(-1)
+        allTasks = tasks + nonActiveTasks
+        """
+        if self.allData:
+            allTasks = tasks + nonActiveTasks
+        else:
+            allTasks = tasks
+        """
+        bestTasks = []
+        bestError = float('Inf')
+
+        retrain(state, classifier, True, accuracy)
+        probPredictions = classifier.predict_proba(allTasks)
+        #expectedError = calcExpectedError(allTasks, classifier)
+
+        for (strategyNumber, baseStrategy) in zip(
+                range(len(self.baseStrategies)), self.baseStrategies):
+            task = baseStrategy.sample(
+                dataGenerator, state, classifier, accuracy)
+            retrain(state, classifier, True, accuracy)
+            probPrediction = classifier.predict_proba(task)[0]
+
+        #for (probPrediction, task) in zip(probPredictions, tasks):    
+            tempState0 = deepcopy(state)
+            tempState1 = deepcopy(state)
+
+            if task not in state:
+                tempState0[task] = [0,0]
+                tempState1[task] = [0,0]
+                
+            tempState0[task][0] += 1
+            tempState1[task][1] += 1
+            
+            retrain(tempState0, classifier, True, accuracy)
+            expectedError0 = calcExpectedError(allTasks, classifier)
+
+            retrain(tempState1, classifier, True, accuracy)
+            expectedError1 = calcExpectedError(allTasks, classifier)
+
+            #newExpectedError = ((probPrediction[0] * expectedError0) +
+            #                    (probPrediction[1] * expectedError1))
+
+            newExpectedError = (
+                (((probPrediction[0] * accuracy) + 
+                  (probPrediction[1] * (1.0-accuracy))) *
+                 expectedError0) + 
+                (((probPrediction[1] * accuracy) +
+                  (probPrediction[0] * (1.0-accuracy)))* 
+                 expectedError1))
+
+            if newExpectedError < bestError:
+                bestTasks = [task]
+                bestError = newExpectedError
+            elif newExpectedError == bestError:
+                bestTasks.append(task)
+            else:
+                continue
+                
+        #print "Best tasks"
+        #print [x for (x,y)  in bestTasks]
+        nextTask = sample(bestTasks,1)[0]
+        return nextTask
 
