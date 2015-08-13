@@ -14,7 +14,8 @@ from samplingMethods import *
 import pickle
 
 ##########################################################################
-# learn
+# uses an active learning strategy to learn a classifier
+# metric can be 'acc' or 'fscore'
 ##########################################################################
 def learn(numRelabels, state, dataGenerator,
           samplingStrategy,
@@ -23,7 +24,8 @@ def learn(numRelabels, state, dataGenerator,
           outputfile,
           statfile,
           interval,
-          numClasses, bayesOptimal = False, smartBudgeting = False,
+          numClasses, metric = 'acc',
+          bayesOptimal = False, smartBudgeting = False,
           budgetInterval = None):
 
     if budgetInterval == None:
@@ -178,9 +180,17 @@ def learn(numRelabels, state, dataGenerator,
             #print state
             retrain(state, classifier, True, accuracy)
             #pickle.dump(computeStats(state[0:-1]), statfile)
-            outputString+= ("%f\t"% classifier.score(
-                dataGenerator.testingTasks, 
-                dataGenerator.testingTaskClasses))
+            if metric == 'acc':
+                outputString+= ("%f\t"% classifier.score(
+                    dataGenerator.testingTasks, 
+                    dataGenerator.testingTaskClasses))
+            elif metric == 'fscore':
+                outputString+= ("%f\t"% classifier.score(
+                    dataGenerator.testingTasks, 
+                    dataGenerator.testingTaskClasses))
+            else:
+                print "Unknown Metric Specified"
+                raise Exception('Unknown Metric Specified')
             statOutputString+= ("%f,%f\t"% computeStats(state)[1:])
         
     outputString += "\n"

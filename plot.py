@@ -372,10 +372,16 @@ hues = ['#b3cde3', '#8c96c6', '#8856a7', '#810f7c', '#000000']
 features = [90]
 budget = 1000
 foldername = 'g7R'
+#foldername = 'relex'
 
 filenames = []
     
 filenames.append('outputs/%s/impactPrior(2)-f%d-lr-g1.0-%d-250')
+filenames.append('outputs/%s/dtvoi(2)-f%d-lr-g1.0-%d-250')
+filenames.append('outputs/%s/dtvoiOPT(2)-f%d-lr-g1.0-%d-250')
+filenames.append('outputs/%s/dtvoiPLOPT(2)-f%d-lr-g1.0-%d-250')
+filenames.append('outputs/%s/dtvoiPLOPT(7)-f%d-lr-g1.0-%d-250')
+
 #filenames.append(
 #    open('outputs/%s/impactPrior(7)-f%d-lr-g1.0-%d-250' % (foldername, feature,budget), 'r'))
 #filenames.append(
@@ -425,8 +431,8 @@ filenames.append('outputs/%s/impactPriorPLOPT(7)-f%d-lr-g1.0-%d-250')
 filenames.append('outputs/%s/unc-f%d-lr-g1.0-%d-250')
 #filenames.append('outputs/%s/unc-f%d-lr-g1.0-%dx10-250')
 #filenames.append('outputs/%s/dtvoi-f%d-lr-g1.0-%d-250')
-filenames.append('outputs/%s/dtvoi-r-f%d-lr-g1.0-%d-250')
-filenames.append('outputs/%s/dtvoi-r(2)-f%d-lr-g1.0-%d-250')
+#filenames.append('outputs/%s/dtvoi-r-f%d-lr-g1.0-%d-250')
+#filenames.append('outputs/%s/dtvoi-r(2)-f%d-lr-g1.0-%d-250')
 #filenames.append(open('outputs/%s/unc-r3-f%d-lr-g1.0-%d-250' % 
 #                  'r'))
 #filenames.append(open('outputs/%s/unc0.5-f%d-lr-g1.0-%d-250' % 
@@ -436,8 +442,7 @@ filenames.append('outputs/%s/dtvoi-r(2)-f%d-lr-g1.0-%d-250')
 #filenames.append('outputs/%s/unc-f%d-lr-g0.0-%d-250')
 #filenames.append('outputs/%s/unc-f%d-lr-g0.0-%d-250')
 
-#filenames.append(open('outputs/%s/pass-f%d-lr-g1.0-%d-250' % 
-#                  'r'))
+#filenames.append('outputs/%s/pass-f%d-lr-g0.0-%d-250')
 
 
 #filenames.append(open('outputs/g7/unc-r3-f%d-lr-g1.0-1000-250' % feature, 
@@ -445,15 +450,21 @@ filenames.append('outputs/%s/dtvoi-r(2)-f%d-lr-g1.0-%d-250')
 
 strategyNames = []
 strategyNames.append('impactEXP')
+strategyNames.append('dtvoi(2)')
+strategyNames.append('dtvoiOPT(2)')
+strategyNames.append('dtvoiPLOPT(2)')
+strategyNames.append('dtvoiPLOPT(7)')
+
 #strategyNames.append('impactOPT')
 #strategyNames.append('impactPLOPT')
 #strategyNames.append('impactPLOPT-S')
 #strategyNames.append('impactPLOPT-S(3)')
 strategyNames.append('impactPLOPT(7)')
 strategyNames.append(r'$US_{X_U}$')
+#strategyNames.append('passive')
 #strategyNames.append(r'$US_{X_U}x10$')
-strategyNames.append('dtvoi-r(7)')
-strategyNames.append('dtvoi-r(2)')
+#strategyNames.append('dtvoi-r(7)')
+#strategyNames.append('dtvoi-r(2)')
 
 
 for feature in features:

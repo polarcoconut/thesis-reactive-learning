@@ -84,8 +84,8 @@ numFeatures = 90
 numClasses = 2
 budget = 100
 #budget = int(sum(1 for line in f) / 2.0)
-numberOfSimulations = 10
-
+numberOfSimulations = 2
+metric = 'fscore'
 
 instances = []
 classes = []
@@ -137,6 +137,14 @@ samplingStrategies = [uncertaintySamplingAlpha(0.1),
 
 #samplingStrategies = [bayesianUncertaintySampling()]
 #samplingStrategies = [DTVOISampling()]
+#samplingStrategies = [DTVOISampling(optimism=True)]
+#samplingStrategies = [DTVOISampling(optimism=True, symmetric = True)]
+#samplingStrategies = [DTVOISampling(optimism=True, pseudolookahead = True)]
+#samplingStrategies = [DTVOISampling(pseudolookahead = True, symmetric = True)]
+#samplingStrategies = [DTVOISampling(pseudolookahead = True, optimism = True,
+#                                     symmetric = True)]
+#samplingStrategies = [DTVOISampling(pseudolookahead = True, optimism = True,
+#                                     symmetric = True, getLastItemLabeled=True)]
 
 """
 samplingStrategies = [impactSampling(),
@@ -149,7 +157,7 @@ samplingStrategies = [impactSampling(),
 
 
 
-neighbor = impactSampling(optimism=True, pseudolookahead=True,
+neighbor1 = impactSampling(optimism=True, pseudolookahead=True,
                           strategies = 
                           [uncertaintySampling(),
                            uncertaintySamplingLabeled(),
@@ -159,6 +167,16 @@ neighbor = impactSampling(optimism=True, pseudolookahead=True,
                            uncertaintySamplingAlpha(0.7),
                            uncertaintySamplingAlpha(0.9)])
 
+
+neighbor2 = DTVOISampling(optimism=True, pseudolookahead=True,
+                          strategies = 
+                          [uncertaintySampling(),
+                           uncertaintySamplingLabeled(),
+                           uncertaintySamplingAlpha(0.1),
+                           uncertaintySamplingAlpha(0.3),
+                           uncertaintySamplingAlpha(0.5),
+                           uncertaintySamplingAlpha(0.7),
+                           uncertaintySamplingAlpha(0.9)])
 
 """
 random = randomSampling(strategies = 
@@ -183,6 +201,16 @@ samplingStrategies = [impactSampling(),
                       neighbor]
 """
 
+"""
+samplingStrategies = [DTVOISampling(),
+                      DTVOISampling(optimism = True),
+                      DTVOISampling(pseudolookahead = True),
+                      DTVOISampling(optimism=True, 
+                                     pseudolookahead=True),
+                      neighbor2]
+"""
+
+
 samplingStrategies = [impactSampling(optimism = True),
                       impactSampling(optimism=True, 
                                      pseudolookahead=True),
@@ -190,7 +218,8 @@ samplingStrategies = [impactSampling(optimism = True),
                       passive()]
 
 
-#samplingStrategies = [neighbor]
+#samplingStrategies = [neighbor1]
+#samplingStrategies = [neighbor2]
 #samplingStrategies = [uncertaintySamplingRelabel(5)]
 #samplingStrategies = [uncertaintySamplingAlpha(0.9)]
 
@@ -235,6 +264,7 @@ relearningScores3 = []
 relearningScores5 = []
 relearningScores7 = []
 allScores = [[] for file in files]
+allFScores = [[] for file in files]
 allStats = [[] for file in files]
 
 activeLearningSkips = []
@@ -316,7 +346,8 @@ for numSim in range(0, numberOfSimulations):
                     1, deepcopy(state), dataGenerator,
                     samplingStrategy,
                     gamma, budget, 
-                    classifier, strategyFile, statFile, 12, numClasses)
+                    classifier, strategyFile, statFile, 12, numClasses,
+                    metric)
                 success = True
             except Exception as e:
                 exc_type, exc_value, exc_traceback = sys.exc_info()
@@ -331,6 +362,7 @@ for numSim in range(0, numberOfSimulations):
         strategyFile.flush()
         statFile.flush()
         allScores[i].append(accuracies[0][0])
+        allFScores[i].append(accuracies[0][1])
         allStats[i].append(stats)
 
     for samplingStrategy in samplingStrategies:
@@ -1124,12 +1156,19 @@ ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
 ps.print_stats()
 print s.getvalue()
 
-print "All Scores:"
+print "All Accuracies:"
 for (i, samplingStrategy) in zip(range(len(samplingStrategies)),
                                  samplingStrategies):
     print samplingStrategy.getName()
     print np.average(allScores[i])
     print 1.96 * np.std(allScores[i]) / sqrt(len(allScores[i]))
+
+print "All FScores:"
+for (i, samplingStrategy) in zip(range(len(samplingStrategies)),
+                                 samplingStrategies):
+    print samplingStrategy.getName()
+    print np.average(allFScores[i])
+    print 1.96 * np.std(allFScores[i]) / sqrt(len(allFScores[i]))
     
 print "All Stats:"
 for (i, samplingStrategy) in zip(range(len(samplingStrategies)),
