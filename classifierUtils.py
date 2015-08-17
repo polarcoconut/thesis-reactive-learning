@@ -492,7 +492,7 @@ def getChangeInClassifier(tasks, state, classifier, accuracy, task,
               (nextLabelProbs[0] * (1.0-accuracy)))* 
              changeInClassifier1))
 
-    expectedChange /= len(priors)
+    expectedChange /= len(priorSamples)
 
     """
     print "-Normal-"
@@ -596,8 +596,12 @@ def getErrorInClassifier(tasks, state, classifier, accuracy, task,
     expectedError0 /= numAdditionalLabels
     expectedError1 /= numAdditionalLabels
 
+    print "OPTIMISM!"
+    print expectedError0
+    print expectedError1
+
     if optimism:
-        return max(expectedError0, expectedError1)
+        return min(expectedError0, expectedError1)
 
 
     if numBootstrapSamples != 0:
@@ -634,7 +638,7 @@ def getErrorInClassifier(tasks, state, classifier, accuracy, task,
               (nextLabelProbs[0] * (1.0-accuracy)))* 
              expectedError1))
 
-    expectedError /= len(priors)
+    expectedError /= len(priorSamples)
 
     return expectedError
 

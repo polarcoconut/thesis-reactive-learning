@@ -42,8 +42,8 @@ if len(sys.argv) > 1:
 #budget = 350
 #let's assume all workers and difficulties are the same for now
 # Accuracies: 55: 3.3, 65: 1.7, 75: 1.0, 85: 0.5, 95: 0.15
-#gamma = 1.0
-gamma = 0.0
+gamma = 1.0
+#gamma = 0.0
 d = 0.5
 
 print "Accuracy of the workers:"
@@ -82,10 +82,10 @@ print 0.5 * (1.0 + (1.0 - d) ** gamma)
 realDataName = 'g7R'
 numFeatures = 90
 numClasses = 2
-budget = 100
+budget = 1000
 #budget = int(sum(1 for line in f) / 2.0)
-numberOfSimulations = 2
-metric = 'fscore'
+numberOfSimulations = 5
+metric = 'acc'
 
 instances = []
 classes = []
@@ -210,12 +210,32 @@ samplingStrategies = [DTVOISampling(),
                       neighbor2]
 """
 
+"""
+samplingStrategies = [impactSampling(),
+                      impactSampling(optimism = True),
+                      impactSampling(pseudolookahead = True),
+                      impactSampling(optimism=True, 
+                                     pseudolookahead=True),
+                      neighbor1,
+                      DTVOISampling(),
+                      DTVOISampling(optimism = True),
+                      DTVOISampling(pseudolookahead = True),
+                      DTVOISampling(optimism=True, 
+                                     pseudolookahead=True),
+                      neighbor2]
+"""
 
+"""
 samplingStrategies = [impactSampling(optimism = True),
                       impactSampling(optimism=True, 
                                      pseudolookahead=True),
                       uncertaintySampling(),
                       passive()]
+"""
+
+
+#samplingStrategies = [uncertaintySampling(),
+#                      passive()]
 
 
 #samplingStrategies = [neighbor1]

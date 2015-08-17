@@ -185,7 +185,7 @@ def learn(numRelabels, state, dataGenerator,
                     dataGenerator.testingTasks, 
                     dataGenerator.testingTaskClasses))
             elif metric == 'fscore':
-                outputString+= ("%f\t"% classifier.score(
+                outputString+= ("%f\t"% classifier.fscore(
                     dataGenerator.testingTasks, 
                     dataGenerator.testingTaskClasses))
             else:
