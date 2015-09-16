@@ -142,9 +142,11 @@ def retrain(labels, classifier,
         #if bayesOptimal:
         if False:
             (pZero, pOne) = calcBayesProbability(votes, accuracy)
-            aggregatedLabel = np.argmax(votes)
+            #Sometimes there will be a third vote, for the number of times
+            # we want to add this point.
+            aggregatedLabel = np.argmax(votes[0:2])
             #print (pZero, pOne)
-            maxVotes = max(votes)
+            maxVotes = max(votes[0:2])
             pMax = max(pZero, pOne)
             #print pMax
             #print int(pMax * 100.0) - 1
@@ -174,7 +176,7 @@ def retrain(labels, classifier,
 
             if len(votes) > 2:
                 for k in range(votes[2]):
-                    trainingLabels.append(np.argmax(votes))
+                    trainingLabels.append(np.argmax(votes[0:2]))
                     trainingTasks.append(task)
                     trainingWeights.append(1.0)
             else:

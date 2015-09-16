@@ -23,7 +23,7 @@ rcParams.update({'figure.autolayout': True})
 #rcParams.update({'text.usetex': True})
 #plt.ioff()
 
-#This is the default palette
+#This is the default purple palette
 #sns.set_palette(['#b3cde3', '#8c96c6', '#8856a7', '#810f7c', '#000000'])
 
 #sns.set_palette(sns.dark_palette("muted purple", input="xkcd", reverse=True))
@@ -184,7 +184,7 @@ def makeStatAggPlot(allFiles, samplingStrategies,
 
 
 #def makePlot(f, name, style, x, numPoints):
-def makePlot(files, names, style, color, interval):
+def makePlot(files, names, style, color, interval, fscore):
  
     numPoints = budget - startingPoint
     averageLine = []
@@ -192,6 +192,12 @@ def makePlot(files, names, style, color, interval):
 
     snsData = []
     #print files
+
+    if fscore:
+        testlabel = "Test Fscore"
+    else:
+        testlabel = "Test Accuracy"
+
     for (f, name) in zip(files, names):
         makeXAxis = False
         x = []
@@ -224,15 +230,16 @@ def makePlot(files, names, style, color, interval):
                 pd.DataFrame({"condition": [name] * len(x),
                               "Number of Labels" : x,
                               "Sampling Unit" : [numSamples] * len(x),
-                              "Test Accuracy" : snsLineData}))
+                              testlabel : snsLineData}))
         for i in range(len(averageLine)):
             averageLine[i] /= numSamples
     
 
     ax = sns.tsplot(pd.concat(snsData), time="Number of Labels", 
                unit="Sampling Unit",
-               condition="condition", value="Test Accuracy", ci=95)
-
+               condition="condition", value=testlabel, ci=95)
+    #ax.set_xscale('log')
+    #ax.set_yscale('log')
     """
     ax.lines[0].set_marker("o")
     ax.lines[0].set_markersize(5)
@@ -371,36 +378,27 @@ hues = ['#b3cde3', '#8c96c6', '#8856a7', '#810f7c', '#000000']
 #features = [10,30,50,70,90]
 features = [90]
 budget = 1000
-foldername = 'g7R'
-#foldername = 'relex'
+#foldername = 'arr7'
+#foldername = 'g7R'
+#foldername = 'gz1SDSS-r0'
+foldername = 'relex-t3-r4'
+
+fscore = True
 
 filenames = []
     
-filenames.append('outputs/%s/impactPrior(2)-f%d-lr-g1.0-%d-250')
-filenames.append('outputs/%s/dtvoi(2)-f%d-lr-g1.0-%d-250')
-filenames.append('outputs/%s/dtvoiOPT(2)-f%d-lr-g1.0-%d-250')
-filenames.append('outputs/%s/dtvoiPLOPT(2)-f%d-lr-g1.0-%d-250')
-filenames.append('outputs/%s/dtvoiPLOPT(7)-f%d-lr-g1.0-%d-250')
-
-#filenames.append(
-#    open('outputs/%s/impactPrior(7)-f%d-lr-g1.0-%d-250' % (foldername, feature,budget), 'r'))
-#filenames.append(
-#    open('outputs/3g7/impactPriorMediumuncuncLunc0.1unc0.3unc0.5unc0.7unc0.9-f%d-lr-g1.0-1000-250' % feature, 'r'))
-#filenames.append(
-#    open(
-#        'outputs/g7/impactPriorExpectedMax-f%d-lr-g1.0-1000-250' % feature, 'r'))
-#filenames.append(
-#    open('outputs/g7/impactPriorEMNeighboruncuncLunc0.1unc0.3unc0.5unc0.7unc0.9-f%d-lr-g1.0-1000-250' % feature, 'r'))
-#filenames.append(
-#    open(
-#        'outputs/g7/impactPriorExpectedExpectedMax2-f%d-lr-g1.0-1000-250' % feature, 'r'))
-
-#filenames.append(
-#    open(
-#        'outputs/%s/impactPriorBOO(2)-f%d-lr-g1.0-%d-250' % 
-#        (foldername, feature,budget), 'r'))
-
+#filenames.append('outputs/%s/impactPrior(2)-f%d-lr-g1.0-%d-250')
 #filenames.append('outputs/%s/impactPriorOPT(2)-f%d-lr-g1.0-%d-250')
+#filenames.append('outputs/%s/impactPriorOPT(7)-f%d-lr-g0.0-%d-250')
+#filenames.append('outputs/%s/dtvoi-r(7)-f%d-lr-g1.0-%d-250')
+#filenames.append('outputs/%s/dtvoi(7)-f%d-lr-g1.0-%d-250')
+#filenames.append('outputs/%s/dtvoiOPT(7)-f%d-lr-g1.0-%d-250')
+#filenames.append('outputs/%s/dtvoiOPT(2)-f%d-lr-g1.0-%d-250')
+#filenames.append('outputs/%s/dtvoiPLOPT(2)-f%d-lr-g1.0-%d-250')
+#filenames.append('outputs/%s/dtvoiPLOPT(7)-f%d-lr-g1.0-%d-250')
+
+#filenames.append('outputs/%s/impactPriorPLOPT(2)-f%d-lr-g0.0-%d-250')
+#filenames.append('outputs/%s/impactPriorPLOPT(7)-f%d-lr-g0.0-%d-500')
 #filenames.append(
 #    open(
 #        'outputs/%s/impactPriorOPT-S(2)-f%d-lr-g1.0-%d-250' % 
@@ -411,10 +409,11 @@ filenames.append('outputs/%s/dtvoiPLOPT(7)-f%d-lr-g1.0-%d-250')
 #        'outputs/%s/impactPriorPL(2)-f%d-lr-g1.0-%d-250' % 
 #        (foldername, feature,budget), 'r'))
 #filenames.append('outputs/%s/impactPriorPLOPT(2)-f%d-lr-g1.0-%d-250')
-#filenames.append('outputs/%s/impactPriorPLOPT-S(2)-f%d-lr-g1.0-%d-250')
+#filenames.append('outputs/%s/impactPriorPLOPT-S(2)-f%d-lr-g0.0-%d-250')
+#filenames.append('outputs/%s/impactPriorPLOPT-S(7)-f%d-lr-g0.0-%d-100')
 
 #filenames.append('outputs/%s/impactPriorPLOPT-S(3)-f%d-lr-g1.0-%d-250')
-filenames.append('outputs/%s/impactPriorPLOPT(7)-f%d-lr-g1.0-%d-250')
+filenames.append('outputs/%s/impactPriorPLOPT(7)-f%d-lr-g0.0-%d-100')
 #filenames.append(
 #    open(
 #        'outputs/%s/random(7)-f%d-lr-g1.0-%d-250' % 
@@ -428,40 +427,76 @@ filenames.append('outputs/%s/impactPriorPLOPT(7)-f%d-lr-g1.0-%d-250')
 #                  'r'))
 #filenames.append(open('outputs/g7/uncPrior0.5-f%d-lr-g1.0-1000-250' % feature, 
 #                  'r'))
-filenames.append('outputs/%s/unc-f%d-lr-g1.0-%d-250')
-#filenames.append('outputs/%s/unc-f%d-lr-g1.0-%dx10-250')
 #filenames.append('outputs/%s/dtvoi-f%d-lr-g1.0-%d-250')
 #filenames.append('outputs/%s/dtvoi-r-f%d-lr-g1.0-%d-250')
 #filenames.append('outputs/%s/dtvoi-r(2)-f%d-lr-g1.0-%d-250')
-#filenames.append(open('outputs/%s/unc-r3-f%d-lr-g1.0-%d-250' % 
-#                  'r'))
-#filenames.append(open('outputs/%s/unc0.5-f%d-lr-g1.0-%d-250' % 
-#                  'r'))
+#filenames.append('outputs/%s/unc-r5-f%d-rf-g0.0-%d-100-fscore')
+#filenames.append('outputs/%s/unc-r17-f%d-rf-g0.0-%d-100-fscore')
+#filenames.append('outputs/%s/unc0.1-f%d-lr-g1.0-%d-250')
+#filenames.append('outputs/%s/unc0.3-f%d-lr-g1.0-%d-250')
+#filenames.append('outputs/%s/unc0.5-f%d-lr-g1.0-%d-250')
+#filenames.append('outputs/%s/unc0.7-f%d-lr-g1.0-%d-250')
+#filenames.append('outputs/%s/unc0.9-f%d-lr-g1.0-%d-250')
+
 #filenames.append(open('outputs/g7/uncBayes-f%d-lr-g1.0-1000-250' % feature, 
 #                  'r'))
+
+#filenames.append('outputs/%s/unc-r3-f%d-lr-g1.0-%d-250')
+#filenames.append('outputs/%s/unc-r5-f%d-lr-g1.0-%d-250')
+#filenames.append('outputs/%s/unc-r7-f%d-lr-g1.0-%d-250')
+#filenames.append('outputs/%s/unc-r9-f%d-lr-g1.0-%d-250')
+#filenames.append('outputs/%s/unc-r11-f%d-lr-g1.0-%d-250')
+
+#filenames.append('outputs/%s/unc-f%d-lr-g1.0-%d-250')
+#filenames.append('outputs/%s/unc-f%d-lr-g1.0-%d-192')
+
+filenames.append('outputs/%s/unc-f%d-lr-g0.0-%d-100')
 #filenames.append('outputs/%s/unc-f%d-lr-g0.0-%d-250')
-#filenames.append('outputs/%s/unc-f%d-lr-g0.0-%d-250')
 
-#filenames.append('outputs/%s/pass-f%d-lr-g0.0-%d-250')
+filenames.append('outputs/%s/pass-f%d-lr-g0.0-%d-100')
+#filenames.append('outputs/%s/passAll-f%d-lr-g1.0-%d-250')
 
 
-#filenames.append(open('outputs/g7/unc-r3-f%d-lr-g1.0-1000-250' % feature, 
-#                  'r'))
+
 
 strategyNames = []
-strategyNames.append('impactEXP')
-strategyNames.append('dtvoi(2)')
-strategyNames.append('dtvoiOPT(2)')
-strategyNames.append('dtvoiPLOPT(2)')
-strategyNames.append('dtvoiPLOPT(7)')
-
+#strategyNames.append('impactEXP(2)')
 #strategyNames.append('impactOPT')
-#strategyNames.append('impactPLOPT')
-#strategyNames.append('impactPLOPT-S')
+#strategyNames.append('EER(7)')
+#strategyNames.append('eerOPT(7)')
+#strategyNames.append('eerOPT(2)')
+#strategyNames.append('eerPLOPT(2)')
+#strategyNames.append('eerPLOPT(7)')
+
+#strategyNames.append('impactOPT(2)')
+#strategyNames.append('impactOPT(7)')
+#strategyNames.append('impactPLOPT(2)')
+#strategyNames.append('impactPLOPT-S(2)')
+
 #strategyNames.append('impactPLOPT-S(3)')
 strategyNames.append('impactPLOPT(7)')
+
+#strategyNames.append('impactPLOPT-S(7)')
+#strategyNames.append(r'$US^{0.1}_{X}$')
+#strategyNames.append(r'$US^{0.3}_{X}$')
+#strategyNames.append(r'$US^{0.5}_{X}$')
+#strategyNames.append(r'$US^{0.7}_{X}$')
+#strategyNames.append(r'$US^{0.9}_{X}$')
+
+#strategyNames.append(r'$US^{2/3}_{X_U}$')
+#strategyNames.append(r'$US^{3/5}_{X_U}$')
+#strategyNames.append(r'$US^{4/7}_{X_U}$')
+#strategyNames.append(r'$US^{5/9}_{X_U}$')
+#strategyNames.append(r'$US^{6/11}_{X_U}$')
+
+#strategyNames.append('impactPLOPT(7)')
 strategyNames.append(r'$US_{X_U}$')
-#strategyNames.append('passive')
+#strategyNames.append(r'$US^*_{X_U}$')
+
+#strategyNames.append(r'$US^5_{X_U}$')
+#strategyNames.append(r'$US^{17}_{X_U}$')
+strategyNames.append('passive')
+#strategyNames.append('passiveAll')
 #strategyNames.append(r'$US_{X_U}x10$')
 #strategyNames.append('dtvoi-r(7)')
 #strategyNames.append('dtvoi-r(2)')
@@ -508,11 +543,16 @@ for feature in features:
     """
     
     for filename in filenames:
-        files.append(open(filename % (foldername, feature, budget), 'r'))
+        if fscore:
+            files.append(open((filename + '-fscore') % (foldername, feature, budget), 'r'))
+        else:
+            files.append(open(filename  %  (foldername, feature, budget), 'r'))
 
-    makePlot(files,strategyNames, '-', hues[0], 12)
-    
-    
+    makePlot(files,strategyNames, '-', hues[0], 12, fscore)
+
+    print "CLOSING FILES"
+    for f in files:
+        f.close()
     
 
     """
@@ -546,7 +586,11 @@ for feature in features:
 
 
 
-    plt.ylim([0.5,1.0])
+    #plt.ylim([0.5,1.0])
+    #plt.ylim([0.6,0.8])
+    #plt.ylim([0.0,1.0])
+    #plt.ylim([0.2,0.4])
+    #plt.xlim([0, 1500])
     plt.show()
     plt.clf()
 

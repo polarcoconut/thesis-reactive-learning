@@ -122,7 +122,7 @@ class impactSampling(samplingMethod):
                 baseStrategyTask = baseStrategy.sample(
                     dataGenerator, state, classifier, accuracy)
 
-            #If we are getting an OLD task
+            #If we are getting an OLD task, that is RELABELING
             if baseStrategyTask in nonActiveTasks:
                 currentLookaheadLength = (max(state[baseStrategyTask]) -
                                             min(state[baseStrategyTask])) + 1
@@ -136,24 +136,38 @@ class impactSampling(samplingMethod):
 
             else:
                 if self.symmetric:
-                    baseStrategyChange = getChangeInClassifier(
-                        allTasks, state, classifier, 
-                        accuracy, baseStrategyTask,
-                        optimism = self.optimism, 
-                        pseudolookahead = self.pseudolookahead,
-                        numBootstrapSamples = self.numBootstrapSamples)
+                    """
                     if baseStrategyChange == 0  and self.pseudolookahead:
+                    """ 
+                    bestPseudolookahead = 0.0
+                    if self.pseudolookahead:
                         print "DOING UNLABELED LOOKAHEAD"
-                        baseStrategyChange = doUnlabeledPseudoLookahead(
-                            tasks, baseStrategyTask, state, classifier, 
-                            baseStrategy, dataGenerator,
-                            accuracy, self.lastLookaheadLength,
-                            optimism = self.optimism)
-                        baseStrategyChange /= self.lastLookaheadLength
+                        for length in range(1,self.lastLookaheadLength+1):
+                            baseStrategyChange = doUnlabeledPseudoLookahead(
+                                tasks, baseStrategyTask, state, classifier, 
+                                baseStrategy, dataGenerator,
+                                accuracy, length,
+                                optimism = self.optimism)
+                            baseStrategyChange /= length
+                            #print baseStrategyChange
+                            #print bestPseudolookahead
+                            #print baseStrategyChange > bestPseudolookahead
+                            if baseStrategyChange > bestPseudolookahead:
+                                bestPseudolookahead = baseStrategyChange
+                        baseStrategyChange = bestPseudolookahead
+                    else:
+                        baseStrategyChange = getChangeInClassifier(
+                            allTasks, state, classifier, 
+                            accuracy, baseStrategyTask,
+                            optimism = self.optimism, 
+                            pseudolookahead = self.pseudolookahead,
+                            numBootstrapSamples = self.numBootstrapSamples)
+
 
                 else:
                     baseStrategyChange = getChangeInClassifier(
                         allTasks, state, classifier, accuracy, baseStrategyTask,
+                        optimism = self.optimism,
                         numBootstrapSamples = self.numBootstrapSamples)
 
 
@@ -298,6 +312,45 @@ class passive(samplingMethod):
         #return activeTaskIndices[len(activeTaskIndices)-1]
         #return activeTaskIndices.pop(-1)
         return sample(dataGenerator.trainingTasks, 1)[0]
+
+
+class passive(samplingMethod):
+
+    def __init__(self):
+        pass
+
+    def reinit(self):
+        pass
+
+    def getName(self):
+        return 'pass'
+
+    def sample(self, dataGenerator, state, classifier, accuracy):
+        #activeTaskIndices.remove(len(activeTaskIndices)- 1)
+        #return activeTaskIndices[len(activeTaskIndices)-1]
+        #return activeTaskIndices.pop(-1)
+        return sample(dataGenerator.trainingTasks, 1)[0]
+
+
+class passiveAll(samplingMethod):
+
+    def __init__(self):
+        pass
+
+    def reinit(self):
+        pass
+
+    def getName(self):
+        return 'passAll'
+
+    def sample(self, dataGenerator, state, classifier, accuracy):
+        tasks = dataGenerator.trainingTasks
+        nonActiveTasks = state.keys()
+        nonActiveTasks.remove(-1)
+        allTasks = tasks + nonActiveTasks
+
+        return sample(allTasks, 1)[0]
+
 
 #This is not passive. This is randomly choosing between two points.
 class randomSampling(samplingMethod):

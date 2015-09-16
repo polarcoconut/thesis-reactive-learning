@@ -10,7 +10,7 @@ class RFWrapper:
 
     def retrain(self, examples, labels, weights):
         #self.classifier = RandomForestClassifier()
-        self.classifier = RandomForestClassifier(max_depth = 5)
+        self.classifier = RandomForestClassifier(max_depth = 10)
         #self.classifier = RandomForestRegressor(max_depth = 5)
         #print examples
         #print labels
@@ -28,9 +28,9 @@ class RFWrapper:
     def fscore(self, testExamples, labels):
         predictions = self.predict(testExamples)
         precision = 0.0
-        precisionD = 0.000000001
+        precisionD = 0.0
         recall = 0.0
-        recallD = 0.000000001
+        recallD = 0.0
         for (prediction, label) in zip(predictions, labels):
             if prediction == 1:
                 if label == 1:
@@ -41,10 +41,14 @@ class RFWrapper:
                     recall += 1
                 recallD += 1
         
+        if precision == 0 and recall == 0:
+            return  (precision, recall, 0)
+
         precision /= precisionD
         recall /= recallD
         
-        return 2 * ((precision * recall) / (precision + recall + 0.000000001))
+        return (precision, recall, 
+                2 * ((precision * recall) / (precision + recall)))
 
     #distance to the hyperplane
     def getUncertainty(self, example):

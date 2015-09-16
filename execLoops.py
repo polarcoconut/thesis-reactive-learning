@@ -21,10 +21,13 @@ def learn(numRelabels, state, dataGenerator,
           samplingStrategy,
           gamma, budget, 
           classifier, 
-          outputfile,
+          outputfileAcc,
+          outputfileFscore,
           statfile,
+          precisionfile,
+          recallfile,
           interval,
-          numClasses, metric = 'acc',
+          numClasses,
           bayesOptimal = False, smartBudgeting = False,
           budgetInterval = None):
 
@@ -33,8 +36,11 @@ def learn(numRelabels, state, dataGenerator,
 
     accuracy = (1.0 / 2.0)*(1.0+((1.0 - 0.5) ** gamma))
 
-    outputString = ""
+    outputStringAcc = ""
+    outputStringFscore = ""
     statOutputString = ""
+    precisionOutputString = ""
+    recallOutputString = ""
     activeTasks = []
     activeTaskIndices = []
 
@@ -88,6 +94,7 @@ def learn(numRelabels, state, dataGenerator,
             #dataGenerator.trainingTasks.remove(nextTask)
         nextClass = dataGenerator.trainingTaskClasses[nextTask]
         if isinstance(nextClass, list):
+            print nextClass
             nextClass  = sample(nextClass, 1)[0]
 
         dataGenerator.replenish()
@@ -148,11 +155,13 @@ def learn(numRelabels, state, dataGenerator,
                 #print testingTaskClasses[0:10]
                 #print classifier.score(testingTasks, testingTaskClasses)
                 #print classifier.getParams()
+                (precision, recall, fscore) = classifier.fscore(
+                    dataGenerator.testingTasks, 
+                    dataGenerator.testingTaskClasses)
                 accuracies.append(
                     (classifier.score(dataGenerator.testingTasks, 
                                       dataGenerator.testingTaskClasses),
-                     classifier.fscore(dataGenerator.testingTasks, 
-                                       dataGenerator.testingTaskClasses)))
+                     (precision, recall, fscore)))
                 print accuracies
                 #print accuracies
             if smartBudgeting:
@@ -180,23 +189,31 @@ def learn(numRelabels, state, dataGenerator,
             #print state
             retrain(state, classifier, True, accuracy)
             #pickle.dump(computeStats(state[0:-1]), statfile)
-            if metric == 'acc':
-                outputString+= ("%f\t"% classifier.score(
+            (precision, recall, fscore) = classifier.fscore(
                     dataGenerator.testingTasks, 
-                    dataGenerator.testingTaskClasses))
-            elif metric == 'fscore':
-                outputString+= ("%f\t"% classifier.fscore(
-                    dataGenerator.testingTasks, 
-                    dataGenerator.testingTaskClasses))
-            else:
-                print "Unknown Metric Specified"
-                raise Exception('Unknown Metric Specified')
+                    dataGenerator.testingTaskClasses)
+            outputStringAcc += ("%f\t"% classifier.score(
+                dataGenerator.testingTasks, 
+                dataGenerator.testingTaskClasses))
+            outputStringFscore += ("%f\t"% fscore)
+            precisionOutputString += ("%f\t"% precision)
+            recallOutputString += ("%f\t"% recall)
+
+
             statOutputString+= ("%f,%f\t"% computeStats(state)[1:])
         
-    outputString += "\n"
-    outputfile.write(outputString)
+    outputStringAcc += "\n"
+    outputfileAcc.write(outputStringAcc)
+    outputStringFscore += "\n"
+    outputfileFscore.write(outputStringFscore)
+
     statOutputString += "\n"
     statfile.write(statOutputString)
+    precisionOutputString += "\n"
+    precisionfile.write(precisionOutputString)
+    recallOutputString += "\n"
+    recallfile.write(recallOutputString)
+
     #pickle.dump("END", statfile)
 
     #print trainingTasks

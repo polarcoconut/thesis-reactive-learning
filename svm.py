@@ -10,15 +10,15 @@ class SVMWrapper:
     def __init__(self, C = 1):
         self.k = 4
         self.C = C
-    def retrain(self, examples, labels):
+    def retrain(self, examples, labels, weights):
         #self.classifier = svm.SVC(kernel = 'poly', degree=1, coef0=0,
         #                            verbose = False)
         #self.classifier = svm.LinearSVC(C = self.C, loss='l1')
         #self.classifier = svm.SVC(C = self.C)
         #self.classifier = svm.SVC(C = 100.0)
         #self.classifier = svm.SVR(C = 10000.0)
-        self.classifier = LinearRegression()
-        #self.classifier = svm.SVC()
+        #self.classifier = LinearRegression()
+        self.classifier = svm.SVC()
         #self.classifier = svm.SVC(kernel = 'linear', C=1e-8)
         #self.classifier = svm.LinearSVC(C = 1e-8)
         #print examples

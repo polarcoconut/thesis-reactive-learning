@@ -586,15 +586,26 @@ def getErrorInClassifier(tasks, state, classifier, accuracy, task,
 
     #print "START RETRAINING"
     
+        
     retrain(tempState0, classifier, True, accuracy)
     expectedError0 = calcExpectedError(tasks, classifier)
         
     retrain(tempState1, classifier, True, accuracy)
     expectedError1 = calcExpectedError(tasks, classifier)
 
-
-    expectedError0 /= numAdditionalLabels
-    expectedError1 /= numAdditionalLabels
+    #This if is not necessary, but it makes things faster
+    if numAdditionalLabels > 1:
+        retrain(state, classifier, True, accuracy)
+        currentExpectedError = calcExpectedError(tasks, classifier)
+        difference0 = currentExpectedError - expectedError0
+        difference1 = currentExpectedError - expectedError1
+        difference0 /= numAdditionalLabels
+        difference1 /= numAdditionalLabels
+        expectedError0 -= difference0
+        expectedError1 -= difference1
+        
+    #expectedError0 /= numAdditionalLabels
+    #expectedError1 /= numAdditionalLabels
 
     print "OPTIMISM!"
     print expectedError0

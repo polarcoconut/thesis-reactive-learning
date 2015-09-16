@@ -32,9 +32,9 @@ class LRWrapper:
     def fscore(self, testExamples, labels):
         predictions = self.predict(testExamples)
         precision = 0.0
-        precisionD = 0.000000001
+        precisionD = 0.0
         recall = 0.0
-        recallD = 0.000000001
+        recallD = 0.0
         for (prediction, label) in zip(predictions, labels):
             if prediction == 1:
                 if label == 1:
@@ -44,11 +44,14 @@ class LRWrapper:
                 if prediction == 1:
                     recall += 1
                 recallD += 1
+
+        if precision == 0 and recall == 0:
+            return  (precision, recall, 0)
         
         precision /= precisionD
         recall /= recallD
-        
-        return 2 * ((precision * recall) / (precision + recall + 0.000000001))
+
+        return (precision, recall, 2 * ((precision * recall) / (precision + recall)))
 
     def getUncertainty(self, example):
         probs = self.classifier.predict_proba([example])

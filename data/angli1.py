@@ -101,6 +101,14 @@ def getTestAndGoldData(testFile, allFeatures, relId):
 			count += 1
 
 	print "Test Data Ready"
+        print "Here's data about the skew"
+        skew = 0.0
+        for label in y_gold_single:
+                if label == 1:
+                        skew += 1
+        skew /= len(y_gold_single)
+        print skew
+
 	# lenTestFeatures = len(testFeatures)
 	# print "%d features in the test data" % lenTestFeatures
 	return y_gold_single, X_test

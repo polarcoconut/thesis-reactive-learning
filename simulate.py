@@ -25,7 +25,7 @@ from samplingMethodClasses import *
 
 from math import sqrt, floor
 from data.makedata import makeGaussianData, makeTriGaussianData, makeLogicalData, makeUniformData
-from data.makedataClasses import uniformData, gaussianData, realData, relationExtractionData
+from data.makedataClasses import uniformData, gaussianData, triGaussianData, realData, relationExtractionData, galaxyZooData
 from ordereddict import OrderedDict
 
 import cProfile, pstats, StringIO
@@ -42,8 +42,8 @@ if len(sys.argv) > 1:
 #budget = 350
 #let's assume all workers and difficulties are the same for now
 # Accuracies: 55: 3.3, 65: 1.7, 75: 1.0, 85: 0.5, 95: 0.15
-gamma = 1.0
-#gamma = 0.0
+#gamma = 1.0
+gamma = 0.0
 d = 0.5
 
 print "Accuracy of the workers:"
@@ -80,12 +80,13 @@ print 0.5 * (1.0 + (1.0 - d) ** gamma)
 #f = open('data/sensor_readings_24.data', 'r') #24 attributes, 4 classes
 
 realDataName = 'g7R'
+
+
 numFeatures = 90
 numClasses = 2
 budget = 1000
 #budget = int(sum(1 for line in f) / 2.0)
-numberOfSimulations = 5
-metric = 'acc'
+numberOfSimulations = 1
 
 instances = []
 classes = []
@@ -126,12 +127,15 @@ samplingStrategies = [uncertaintySamplingAlpha(0.1),
 #                                     symmetric = True, getLastItemLabeled=True)]
 
 #samplingStrategies = [uncertaintySampling()]
+
 #samplingStrategies = [uncertaintySamplingRelabel(3),
 #                      uncertaintySamplingRelabel(5),
 #                      uncertaintySamplingRelabel(7),
 #                      uncertaintySamplingRelabel(9),
-#                      uncertaintySamplingRelabel(11),]
+#                      uncertaintySamplingRelabel(11)]
+
 #samplingStrategies = [passive()]
+#samplingStrategies = [passiveAll()]
 #samplingStrategies = [impactSampling(),
 #                      uncertaintySampling()]
 
@@ -168,7 +172,7 @@ neighbor1 = impactSampling(optimism=True, pseudolookahead=True,
                            uncertaintySamplingAlpha(0.9)])
 
 
-neighbor2 = DTVOISampling(optimism=True, pseudolookahead=True,
+neighbor2 = DTVOISampling(optimism=True,
                           strategies = 
                           [uncertaintySampling(),
                            uncertaintySamplingLabeled(),
@@ -178,6 +182,66 @@ neighbor2 = DTVOISampling(optimism=True, pseudolookahead=True,
                            uncertaintySamplingAlpha(0.7),
                            uncertaintySamplingAlpha(0.9)])
 
+neighbor8 = DTVOISampling(strategies = 
+                          [uncertaintySampling(),
+                           uncertaintySamplingLabeled(),
+                           uncertaintySamplingAlpha(0.1),
+                           uncertaintySamplingAlpha(0.3),
+                           uncertaintySamplingAlpha(0.5),
+                           uncertaintySamplingAlpha(0.7),
+                           uncertaintySamplingAlpha(0.9)])
+
+neighbor3 = impactSampling(optimism=True, pseudolookahead=True,
+                          strategies = 
+                          [uncertaintySampling(),
+                           uncertaintySamplingLabeled(),
+                           passiveAll(),
+                           passiveAll(),
+                           passiveAll(),
+                           passiveAll(),
+                           passiveAll()])
+
+neighbor4 = impactSampling(optimism=True, pseudolookahead=True,
+                          strategies = 
+                          [uncertaintySampling(),
+                           uncertaintySamplingLabeled(),
+                           passive(),
+                           passive(),
+                           passive(),
+                           passive(),
+                           passive()])
+
+neighbor5 = impactSampling(optimism=True,
+                          strategies = 
+                          [uncertaintySampling(),
+                           uncertaintySamplingLabeled(),
+                           passiveAll(),
+                           passiveAll(),
+                           passiveAll(),
+                           passiveAll(),
+                           passiveAll()])
+
+neighbor6 = impactSampling(optimism=True, pseudolookahead=True,
+                           symmetric=True,
+                          strategies = 
+                          [uncertaintySampling(),
+                           uncertaintySamplingLabeled(),
+                           passiveAll(),
+                           passiveAll(),
+                           passiveAll(),
+                           passiveAll(),
+                           passiveAll()])
+
+neighbor7 = impactSampling(optimism=True, pseudolookahead=True,
+                           symmetric=True,
+                          strategies = 
+                          [uncertaintySampling(),
+                           uncertaintySamplingLabeled(),
+                           uncertaintySamplingAlpha(0.1),
+                           uncertaintySamplingAlpha(0.3),
+                           uncertaintySamplingAlpha(0.5),
+                           uncertaintySamplingAlpha(0.7),
+                           uncertaintySamplingAlpha(0.9)])
 """
 random = randomSampling(strategies = 
                           [uncertaintySampling(),
@@ -189,6 +253,7 @@ random = randomSampling(strategies =
                            uncertaintySamplingAlpha(0.9)])
 """
 
+
 """
 samplingStrategies = [impactSampling(),
                       impactSampling(optimism = True),
@@ -198,7 +263,8 @@ samplingStrategies = [impactSampling(),
                       uncertaintySampling(),
                       uncertaintySamplingAlpha(0.5),
                       passive(),
-                      neighbor]
+                      neighbor1, 
+                      neighbor5]
 """
 
 """
@@ -207,6 +273,14 @@ samplingStrategies = [DTVOISampling(),
                       DTVOISampling(pseudolookahead = True),
                       DTVOISampling(optimism=True, 
                                      pseudolookahead=True),
+                      neighbor2]
+"""
+
+
+"""
+samplingStrategies = [DTVOISampling(pseudolookahead = True),
+                      DTVOISampling(optimism=True, 
+                                    pseudolookahead=True),
                       neighbor2]
 """
 
@@ -225,22 +299,69 @@ samplingStrategies = [impactSampling(),
                       neighbor2]
 """
 
+
+"""
+samplingStrategies = [impactSampling(optimism = True),
+                      neighbor5,
+                      impactSampling(optimism=True, 
+                                     pseudolookahead=True),
+                      neighbor3,
+                      uncertaintySampling(),
+                      passive()]
+"""
+
+
 """
 samplingStrategies = [impactSampling(optimism = True),
                       impactSampling(optimism=True, 
                                      pseudolookahead=True),
                       uncertaintySampling(),
                       passive()]
+
 """
 
+"""
+samplingStrategies = [neighbor6,
+                      uncertaintySampling(),
+                      passive(),
+                      neighbor3,
+                      impactSampling(optimism=True, 
+                                     pseudolookahead=True)]
+"""
+
+
+#samplingStrategies = [impactSampling(optimism=True, symmetric=True),
+#                      neighbor6]
+
+
+
+#samplingStrategies = [uncertaintySampling(),
+#                      passive(),
+#                      impactSampling(optimism=True),
+#                      neighbor3]
+
+samplingStrategies = [uncertaintySampling(),
+                      passive(),
+                      neighbor3]
+
+#samplingStrategies = [passive()]
 
 #samplingStrategies = [uncertaintySampling(),
 #                      passive()]
 
+#samplingStrategies = [impactSampling(optimism=True, symmetric=True)]
 
 #samplingStrategies = [neighbor1]
-#samplingStrategies = [neighbor2]
-#samplingStrategies = [uncertaintySamplingRelabel(5)]
+#samplingStrategies = [neighbor2,
+#                      neighbor8]
+#samplingStrategies = [neighbor3]
+#samplingStrategies = [neighbor6]
+#samplingStrategies = [neighbor7]
+#samplingStrategies = [neighbor5]
+#samplingStrategies = [uncertaintySamplingRelabel(5),
+#                      uncertaintySamplingRelabel(17)]
+#samplingStrategies = [uncertaintySamplingRelabel(17)]
+
 #samplingStrategies = [uncertaintySamplingAlpha(0.9)]
 
 
@@ -251,13 +372,26 @@ activeLearningExamples = 50
 
 #dataGenerator = uniformData(budget*2, numFeatures)
 #dataGenerator = gaussianData(budget*2, numFeatures)
+#dataGenerator = triGaussianData(budget*2, numFeatures)
 #dataGenerator = realData(budget * 2, numFeatures, f, realDataName)
 
-dataGenerator = relationExtractionData(budget*2, numFeatures = 1, 
-                                       relInd = 0, pruningThres = 50)
+#MULTIPLY BUDGET by 10 when balancing classes
+dataGenerator = relationExtractionData(budget+900, numFeatures = 1, 
+                                       relInd = 4, pruningThres = 3,
+                                       balanceClasses = False,
+                                       usePerfect = False)
 
-files = []
+#dataGenerator = galaxyZooData(budget+1000, numFeatures = 1, 
+#                              classInd = 0, 
+#                              usePerfect = False,
+#                              sdss = True)
+
+
+accuracyfiles = []
+fscorefiles = []
 statfiles = []
+precisionfiles = []
+recallfiles = []
 folderName = dataGenerator.getName()
 
 for samplingStrategy in samplingStrategies:
@@ -265,15 +399,24 @@ for samplingStrategy in samplingStrategies:
         folderName,samplingStrategy.getName(), 
         numFeatures, gamma, budget, numberOfSimulations)
     if threadNumber == None:
+        fscorefilename = basefilename + '-fscore'
         statfilename = basefilename + '-stats'
+        precisionfilename = basefilename + '-precision'
+        recallfilename = basefilename + '-recall'
         impactstatfilename = basefilename + '-impactStats'
     else:
+        fscorefilename = basefilename + '-fscore-%s' % threadNumber
         statfilename = basefilename + '-stats-%s' % threadNumber
+        precisionfilename = basefilename + '-precision-%s'  % threadNumber
+        recallfilename = basefilename + '-recall-%s'  % threadNumber
         impactstatfilename = basefilename + '-impactStats-%s' % threadNumber
         basefilename += '-%s' % threadNumber
 
-    files.append(open(basefilename, 'w'))
+    accuracyfiles.append(open(basefilename, 'w'))
+    fscorefiles.append(open(fscorefilename, 'w'))
     statfiles.append(open(statfilename, 'w'))
+    precisionfiles.append(open(precisionfilename, 'w'))    
+    recallfiles.append(open(recallfilename, 'w'))
     #if samplingStrategy.__class__.__name__ == 'impactSamplingEMMedium':
     samplingStrategy.logFile = open(impactstatfilename, 'w')
         
@@ -283,9 +426,11 @@ relearningScores1 = []
 relearningScores3 = []
 relearningScores5 = []
 relearningScores7 = []
-allScores = [[] for file in files]
-allFScores = [[] for file in files]
-allStats = [[] for file in files]
+allScores = [[] for file in accuracyfiles]
+allFScores = [[] for file in accuracyfiles]
+allStats = [[] for file in accuracyfiles]
+allPrecisions = [[] for file in accuracyfiles]
+allRecalls = [[] for file in accuracyfiles]
 
 activeLearningSkips = []
 relearningSkips1 = []
@@ -352,10 +497,14 @@ for numSim in range(0, numberOfSimulations):
     print "Relearning"
 
 
-    for (i, samplingStrategy) in zip(range(len(files)),samplingStrategies):
+    for (i, samplingStrategy) in zip(range(len(accuracyfiles)),
+                                     samplingStrategies):
         dataGenerator.generateDuplicateData()
-        strategyFile = files[i]
+        accuracyFile = accuracyfiles[i]
+        fscoreFile = fscorefiles[i]
         statFile = statfiles[i]
+        precisionFile = precisionfiles[i]
+        recallFile = recallfiles[i]
 
         success = False
         numSkips = 0.0
@@ -366,8 +515,9 @@ for numSim in range(0, numberOfSimulations):
                     1, deepcopy(state), dataGenerator,
                     samplingStrategy,
                     gamma, budget, 
-                    classifier, strategyFile, statFile, 12, numClasses,
-                    metric)
+                    classifier, accuracyFile, fscoreFile,
+                    statFile, precisionFile,
+                    recallFile, 12, numClasses)
                 success = True
             except Exception as e:
                 exc_type, exc_value, exc_traceback = sys.exc_info()
@@ -379,10 +529,15 @@ for numSim in range(0, numberOfSimulations):
                 read_input()
                 numSkips += 1.0
         #print accuracies
-        strategyFile.flush()
+        accuracyFile.flush()
+        fscoreFile.flush()
         statFile.flush()
+        precisionFile.flush()
+        recallFile.flush()
         allScores[i].append(accuracies[0][0])
-        allFScores[i].append(accuracies[0][1])
+        allFScores[i].append(accuracies[0][1][2])
+        allPrecisions[i].append(accuracies[0][1][0])
+        allRecalls[i].append(accuracies[0][1][1])
         allStats[i].append(stats)
 
     for samplingStrategy in samplingStrategies:
@@ -1187,6 +1342,13 @@ print "All FScores:"
 for (i, samplingStrategy) in zip(range(len(samplingStrategies)),
                                  samplingStrategies):
     print samplingStrategy.getName()
+    print "Precision"
+    print np.average(allPrecisions[i])
+    print 1.96 * np.std(allPrecisions[i]) / sqrt(len(allPrecisions[i]))
+    print "Recall"
+    print np.average(allRecalls[i])
+    print 1.96 * np.std(allRecalls[i]) / sqrt(len(allRecalls[i]))
+    print "Fscore"
     print np.average(allFScores[i])
     print 1.96 * np.std(allFScores[i]) / sqrt(len(allFScores[i]))
     
@@ -1222,6 +1384,20 @@ print np.average(relearningSkips5)
 print np.average(relearningScores7)
 print 1.96 * np.std(relearningScores7) / sqrt(len(relearningScores7))
 print np.average(relearningSkips7)
+
+
+print "Closing Files"
+for f in accuracyfiles:
+    f.close()
+for f in fscorefiles:
+    f.close()
+for f in statfiles:
+    f.close()
+for f in precisionfiles:
+    f.close()
+for f in recallfiles:
+    f.close()
+
 
 """
 print "Fscores:"

@@ -10,8 +10,8 @@ class DTWrapper:
         self.k = 4
 
     def retrain(self, examples, labels, weights):
-        #self.classifier = DecisionTreeClassifier()
-        self.classifier = DecisionTreeClassifier(max_depth=5)
+        self.classifier = DecisionTreeClassifier()
+        #self.classifier = DecisionTreeClassifier(max_depth=5)
         #print examples
         #print labels
         self.classifier.fit(examples, labels, sample_weight = weights)
