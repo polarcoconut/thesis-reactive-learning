@@ -15,7 +15,6 @@ import pickle
 
 ##########################################################################
 # uses an active learning strategy to learn a classifier
-# metric can be 'acc' or 'fscore'
 ##########################################################################
 def learn(numRelabels, state, dataGenerator,
           samplingStrategy,
@@ -93,9 +92,6 @@ def learn(numRelabels, state, dataGenerator,
                 lambda a: a != nextTask, dataGenerator.trainingTasks)
             #dataGenerator.trainingTasks.remove(nextTask)
         nextClass = dataGenerator.trainingTaskClasses[nextTask]
-        if isinstance(nextClass, list):
-            print nextClass
-            nextClass  = sample(nextClass, 1)[0]
 
         dataGenerator.replenish()
 
@@ -124,9 +120,15 @@ def learn(numRelabels, state, dataGenerator,
         #(trues, falses) = state[index]
         for r in range(numRelabels):
             #(trues, falses) = state[index]
-            incorrectLabels = [i for i in range(numClasses)]
-            incorrectLabels.remove(nextClass)
-            workerLabel = simLabel(0.5, gamma, nextClass, incorrectLabels)
+            if isinstance(nextClass, list):
+                print nextClass
+                nextClass  = sample(nextClass, 1)[0]
+                workerLabel = nextClass
+            else:
+                incorrectLabels = [i for i in range(numClasses)]
+                incorrectLabels.remove(nextClass)
+                workerLabel = simLabel(0.5, gamma, nextClass, incorrectLabels)
+
             state[nextTask][workerLabel] += 1
             state[-1] -= 1
 

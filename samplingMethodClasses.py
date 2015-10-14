@@ -128,11 +128,19 @@ class impactSampling(samplingMethod):
                                             min(state[baseStrategyTask])) + 1
                 if currentLookaheadLength > self.currentLookaheadLength:
                     self.currentLookaheadLength = currentLookaheadLength
-                baseStrategyChange = getChangeInClassifier(
-                    allTasks, state, classifier, accuracy, baseStrategyTask,
-                    optimism = self.optimism, 
-                    pseudolookahead = self.pseudolookahead,
-                    numBootstrapSamples = self.numBootstrapSamples)
+                baseStrategyChange = max(
+                    getChangeInClassifier(
+                        allTasks, state, classifier, accuracy, baseStrategyTask,
+                        optimism = self.optimism, 
+                        pseudolookahead = self.pseudolookahead,
+                        flipLabel = True,
+                        numBootstrapSamples = self.numBootstrapSamples),
+                    getChangeInClassifier(
+                        allTasks, state, classifier, accuracy, baseStrategyTask,
+                        optimism = self.optimism, 
+                        pseudolookahead = self.pseudolookahead,
+                        flipLabel = False,
+                        numBootstrapSamples = self.numBootstrapSamples))
 
             else:
                 if self.symmetric:

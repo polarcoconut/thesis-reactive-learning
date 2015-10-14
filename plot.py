@@ -381,15 +381,15 @@ budget = 1000
 #foldername = 'arr7'
 #foldername = 'g7R'
 #foldername = 'gz1SDSS-r0'
-foldername = 'relex-t3-r4'
+foldername = 'relex-t1-r0'
 
 fscore = True
 
 filenames = []
     
 #filenames.append('outputs/%s/impactPrior(2)-f%d-lr-g1.0-%d-250')
-#filenames.append('outputs/%s/impactPriorOPT(2)-f%d-lr-g1.0-%d-250')
-#filenames.append('outputs/%s/impactPriorOPT(7)-f%d-lr-g0.0-%d-250')
+#filenames.append('outputs/%s/impactPriorOPT(2)-f%d-lr-g0.0-%d-100')
+#filenames.append('outputs/%s/impactPriorOPT(7)-f%d-lr-g0.0-%d-100')
 #filenames.append('outputs/%s/dtvoi-r(7)-f%d-lr-g1.0-%d-250')
 #filenames.append('outputs/%s/dtvoi(7)-f%d-lr-g1.0-%d-250')
 #filenames.append('outputs/%s/dtvoiOPT(7)-f%d-lr-g1.0-%d-250')
@@ -413,7 +413,7 @@ filenames = []
 #filenames.append('outputs/%s/impactPriorPLOPT-S(7)-f%d-lr-g0.0-%d-100')
 
 #filenames.append('outputs/%s/impactPriorPLOPT-S(3)-f%d-lr-g1.0-%d-250')
-filenames.append('outputs/%s/impactPriorPLOPT(7)-f%d-lr-g0.0-%d-100')
+#filenames.append('outputs/%s/impactPriorPLOPT(7)-f%d-lr-g0.0-%d-100')
 #filenames.append(
 #    open(
 #        'outputs/%s/random(7)-f%d-lr-g1.0-%d-250' % 
@@ -432,20 +432,21 @@ filenames.append('outputs/%s/impactPriorPLOPT(7)-f%d-lr-g0.0-%d-100')
 #filenames.append('outputs/%s/dtvoi-r(2)-f%d-lr-g1.0-%d-250')
 #filenames.append('outputs/%s/unc-r5-f%d-rf-g0.0-%d-100-fscore')
 #filenames.append('outputs/%s/unc-r17-f%d-rf-g0.0-%d-100-fscore')
-#filenames.append('outputs/%s/unc0.1-f%d-lr-g1.0-%d-250')
-#filenames.append('outputs/%s/unc0.3-f%d-lr-g1.0-%d-250')
-#filenames.append('outputs/%s/unc0.5-f%d-lr-g1.0-%d-250')
-#filenames.append('outputs/%s/unc0.7-f%d-lr-g1.0-%d-250')
-#filenames.append('outputs/%s/unc0.9-f%d-lr-g1.0-%d-250')
+
+#filenames.append('outputs/%s/unc0.1-f%d-lr-g3.0-%d-100')
+#filenames.append('outputs/%s/unc0.3-f%d-lr-g3.0-%d-100')
+#filenames.append('outputs/%s/unc0.5-f%d-lr-g3.0-%d-100')
+#filenames.append('outputs/%s/unc0.7-f%d-lr-g3.0-%d-100')
+#filenames.append('outputs/%s/unc0.9-f%d-lr-g3.0-%d-100')
 
 #filenames.append(open('outputs/g7/uncBayes-f%d-lr-g1.0-1000-250' % feature, 
 #                  'r'))
 
-#filenames.append('outputs/%s/unc-r3-f%d-lr-g1.0-%d-250')
-#filenames.append('outputs/%s/unc-r5-f%d-lr-g1.0-%d-250')
-#filenames.append('outputs/%s/unc-r7-f%d-lr-g1.0-%d-250')
-#filenames.append('outputs/%s/unc-r9-f%d-lr-g1.0-%d-250')
-#filenames.append('outputs/%s/unc-r11-f%d-lr-g1.0-%d-250')
+filenames.append('outputs/%s/unc-r3-f%d-lr-g0.0-%d-100')
+filenames.append('outputs/%s/unc-r5-f%d-lr-g0.0-%d-100')
+filenames.append('outputs/%s/unc-r7-f%d-lr-g0.0-%d-100')
+filenames.append('outputs/%s/unc-r9-f%d-lr-g0.0-%d-100')
+filenames.append('outputs/%s/unc-r11-f%d-lr-g0.0-%d-100')
 
 #filenames.append('outputs/%s/unc-f%d-lr-g1.0-%d-250')
 #filenames.append('outputs/%s/unc-f%d-lr-g1.0-%d-192')
@@ -474,7 +475,7 @@ strategyNames = []
 #strategyNames.append('impactPLOPT-S(2)')
 
 #strategyNames.append('impactPLOPT-S(3)')
-strategyNames.append('impactPLOPT(7)')
+#strategyNames.append('impactPLOPT(7)')
 
 #strategyNames.append('impactPLOPT-S(7)')
 #strategyNames.append(r'$US^{0.1}_{X}$')
@@ -483,11 +484,11 @@ strategyNames.append('impactPLOPT(7)')
 #strategyNames.append(r'$US^{0.7}_{X}$')
 #strategyNames.append(r'$US^{0.9}_{X}$')
 
-#strategyNames.append(r'$US^{2/3}_{X_U}$')
-#strategyNames.append(r'$US^{3/5}_{X_U}$')
-#strategyNames.append(r'$US^{4/7}_{X_U}$')
-#strategyNames.append(r'$US^{5/9}_{X_U}$')
-#strategyNames.append(r'$US^{6/11}_{X_U}$')
+strategyNames.append(r'$US^{2/3}_{X_U}$')
+strategyNames.append(r'$US^{3/5}_{X_U}$')
+strategyNames.append(r'$US^{4/7}_{X_U}$')
+strategyNames.append(r'$US^{5/9}_{X_U}$')
+strategyNames.append(r'$US^{6/11}_{X_U}$')
 
 #strategyNames.append('impactPLOPT(7)')
 strategyNames.append(r'$US_{X_U}$')

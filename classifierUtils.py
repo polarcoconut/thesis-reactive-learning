@@ -377,6 +377,7 @@ def doUnlabeledLookahead(tasks, task, state, classifier, baseStrategy,
 
 def getChangeInClassifier(tasks, state, classifier, accuracy, task,
                           optimism = False, pseudolookahead= False,
+                          flipLabel = True,
                           numBootstrapSamples = 0):
     
     changeInClassifier0 = 0.0
@@ -394,8 +395,11 @@ def getChangeInClassifier(tasks, state, classifier, accuracy, task,
 
     #currentNotLabel = 1 - currentLabel
 
-    if pseudolookahead and task in state:
-        numAdditionalLabels = abs(state[task][0] - state[task][1]) + 1 
+    if pseudolookahead and task in state and state[task][0] != state[task][1]:
+        if flipLabel:
+            numAdditionalLabels = abs(state[task][0] - state[task][1]) + 1 
+        else:
+            numAdditionalLabels = abs(state[task][0] - state[task][1])          
     else:
         #print "NOT THE WOODO"
         numAdditionalLabels = 1

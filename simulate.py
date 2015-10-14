@@ -39,11 +39,15 @@ threadNumber = None
 if len(sys.argv) > 1:
     threadNumber = sys.argv[1]
 
-#budget = 350
+
 #let's assume all workers and difficulties are the same for now
 # Accuracies: 55: 3.3, 65: 1.7, 75: 1.0, 85: 0.5, 95: 0.15
-#gamma = 1.0
-gamma = 0.0
+
+#These gammas are only used to generate label noise when
+#we do NOT have a list of available labels to sample from.
+#gamma = 1.0 #0.75 accuracy
+#gamma = 3.0 #0.56 accuracy
+gamma = 0.0 #perfect accuracy
 d = 0.5
 
 print "Accuracy of the workers:"
@@ -86,7 +90,7 @@ numFeatures = 90
 numClasses = 2
 budget = 1000
 #budget = int(sum(1 for line in f) / 2.0)
-numberOfSimulations = 1
+numberOfSimulations = 10
 
 instances = []
 classes = []
@@ -100,13 +104,20 @@ numberTrue = 0
 #                      uncertaintySamplingAlpha(0.9)]
 
 
-"""
-samplingStrategies = [uncertaintySamplingAlpha(0.1),
-                      uncertaintySamplingAlpha(0.3),
-                      uncertaintySamplingAlpha(0.5),
-                      uncertaintySamplingAlpha(0.7),
-                      uncertaintySamplingAlpha(0.9)]
-"""
+
+#samplingStrategies = [uncertaintySamplingAlpha(0.1),
+#                      uncertaintySamplingAlpha(0.3),
+#                      uncertaintySamplingAlpha(0.5),
+#                      uncertaintySamplingAlpha(0.7),
+#                      uncertaintySamplingAlpha(0.9)]
+
+
+
+#samplingStrategies = [uncertaintySamplingAlpha(0.1)]
+#samplingStrategies = [uncertaintySamplingAlpha(0.3)]
+#samplingStrategies = [uncertaintySamplingAlpha(0.5)]
+#samplingStrategies = [uncertaintySamplingAlpha(0.7)]
+#samplingStrategies = [uncertaintySamplingAlpha(0.9)]
 
 #samplingStrategies = [uncertaintySamplingAlpha(0.9)]
 
@@ -128,11 +139,19 @@ samplingStrategies = [uncertaintySamplingAlpha(0.1),
 
 #samplingStrategies = [uncertaintySampling()]
 
-#samplingStrategies = [uncertaintySamplingRelabel(3),
-#                      uncertaintySamplingRelabel(5),
-#                      uncertaintySamplingRelabel(7),
-#                      uncertaintySamplingRelabel(9),
-#                      uncertaintySamplingRelabel(11)]
+samplingStrategies = [uncertaintySamplingRelabel(3),
+                      uncertaintySamplingRelabel(5),
+                      uncertaintySamplingRelabel(7),
+                      uncertaintySamplingRelabel(9),
+                      uncertaintySamplingRelabel(11),
+                      uncertaintySampling(),
+                      passive()]
+
+#samplingStrategies = [uncertaintySamplingRelabel(3)]
+#samplingStrategies = [uncertaintySamplingRelabel(5)]
+#samplingStrategies = [uncertaintySamplingRelabel(7)]
+#samplingStrategies = [uncertaintySamplingRelabel(9)]
+#samplingStrategies = [uncertaintySamplingRelabel(11)]
 
 #samplingStrategies = [passive()]
 #samplingStrategies = [passiveAll()]
@@ -335,14 +354,17 @@ samplingStrategies = [neighbor6,
 
 
 
+#USE THIS ONE NEXT
 #samplingStrategies = [uncertaintySampling(),
 #                      passive(),
 #                      impactSampling(optimism=True),
-#                      neighbor3]
+#                      neighbor3,
+#                      neighbor5,
+#                      neighbor6]
 
-samplingStrategies = [uncertaintySampling(),
-                      passive(),
-                      neighbor3]
+#samplingStrategies = [uncertaintySampling(),
+#                      passive(),
+#                      neighbor3]
 
 #samplingStrategies = [passive()]
 
@@ -377,13 +399,13 @@ activeLearningExamples = 50
 
 #MULTIPLY BUDGET by 10 when balancing classes
 dataGenerator = relationExtractionData(budget+900, numFeatures = 1, 
-                                       relInd = 4, pruningThres = 3,
+                                       relInd = 2, pruningThres = 1,
                                        balanceClasses = False,
                                        usePerfect = False)
 
 #dataGenerator = galaxyZooData(budget+1000, numFeatures = 1, 
-#                              classInd = 0, 
-#                              usePerfect = False,
+#                              classInd = 0,
+#                              usePerfect = True,
 #                              sdss = True)
 
 

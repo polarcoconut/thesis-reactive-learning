@@ -7,6 +7,8 @@ from angli1 import getFeatures, getTestAndGoldData, getTrainingData_2, trainAndT
 from angli2 import *
 import difflib
 from string import printable
+from logisticRegression import LRWrapper
+from scipy.stats import spearmanr, pearsonr
 
 class dataGenerator:
     def __init__(self, numExamples, numFeatures, pool = True):
@@ -192,15 +194,17 @@ class galaxyZooData(dataGenerator):
         print len(exampleLabels.keys())
         exampleIds = sample(exampleLabels.keys(), self.numExamples)
         print len(exampleIds)
-        print exampleIds[0:2]
+        #print exampleIds[0:2]
         shuffle(exampleIds)
 
-        print "Splitting the data"
+        print "Splitting the data and computing average accuracy of workers"
+
         self.oldTrainingTasks=[]
         self.oldTrainingTaskClasses = {}
         self.oldTestingTasks=[]
         self.oldTestingTaskClasses = []
         i = 0
+        averageAccuracy = 0.0
         numTrainingExamples = int(floor(0.7*len(exampleIds)))
         for exampleId in exampleIds[0:numTrainingExamples]:
             if i % 1000 == 0:
@@ -210,9 +214,45 @@ class galaxyZooData(dataGenerator):
             if self.usePerfect:
                 self.oldTrainingTaskClasses[example] = exampleClasses[exampleId]
             else:
+                correctClass = exampleClasses[exampleId]
+                accuracy = 0.0
+                for label in exampleLabels[exampleId]:
+                    if label == correctClass:
+                        accuracy += 1.0
+                accuracy /= len(exampleLabels[exampleId])
+                averageAccuracy += accuracy
                 self.oldTrainingTaskClasses[example] = exampleLabels[exampleId]
             i += 1
+        averageAccuracy /= numTrainingExamples
+        print "The average worker accuracy is"
+        print averageAccuracy
 
+        print "Checking to see if there is any correlation between worker accuracy and distances from the hyperplane"
+        classifier = LRWrapper()
+        classifier.retrain(
+            self.oldTrainingTasks, 
+            [self.oldTrainingTaskClasses[example] for example in self.oldTrainingTasks], 
+            None)
+        print "Trained classifier using all the gold data"
+        uncertainties = []
+        accuracies = []
+        for exampleId in exampleIds[0:numTrainingExamples]:
+            correctClass = exampleClasses[exampleId]
+            accuracy = 0.0
+            for label in exampleLabels[exampleId]:
+                if label == correctClass:
+                    accuracy += 1.0
+            accuracy /= len(exampleLabels[exampleId])
+            uncertainties.append(
+                classifier.getUncertainty(exampleFeatures[exampleId]))
+            accuracies.append(accuracy)
+
+        print "Spearman"
+        print spearmanr(uncertainties, accuracies)
+        print "Pearson"
+        print pearsonr(uncertainties, accuracies)
+
+        print "Computing Skew"
         skew = 0.0
         for exampleId in exampleIds[numTrainingExamples:]:
             if i % 1000 == 0:
@@ -342,6 +382,7 @@ class relationExtractionData(dataGenerator):
                 self.oldTrainingTaskClasses[
                     trainingTask] += self.responses[exampleId]
                 
+
         """
         print "Computing the entropy in each feature"
         numFeatures = len(self.oldTrainingTasks[0])
