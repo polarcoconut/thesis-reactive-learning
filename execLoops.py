@@ -67,8 +67,14 @@ def learn(numRelabels, state, dataGenerator,
         #Active Learning
         print "CURRENT INDEX"
         print idx
+        print len(dataGenerator.trainingTasks)
+        #print "Amount of training data"
+        #print len(dataGenerator.trainingTasks)
+
         idx += 1
-        if idx < 61:
+        num_pretrain_examples = 61
+        #num_pretrain_examples = 0
+        if idx < num_pretrain_examples:
             nextTask = passive(dataGenerator, state,
                             classifier, accuracy)
         else:

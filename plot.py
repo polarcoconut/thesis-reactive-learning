@@ -378,11 +378,12 @@ hues = ['#b3cde3', '#8c96c6', '#8856a7', '#810f7c', '#000000']
 #features = [10,30,50,70,90]
 features = [90]
 budget = 1000
-#foldername = 'arr7'
+#foldername = 'ad7'
 #foldername = 'g7R'
 #foldername = 'gz1SDSS-r0'
-foldername = 'relex-t1-r0'
-
+#foldername = 'relex-t1'
+#foldername = 'relex-t3-r0-chris_data_exp_2000'
+foldername = ''
 fscore = True
 
 filenames = []
@@ -398,7 +399,7 @@ filenames = []
 #filenames.append('outputs/%s/dtvoiPLOPT(7)-f%d-lr-g1.0-%d-250')
 
 #filenames.append('outputs/%s/impactPriorPLOPT(2)-f%d-lr-g0.0-%d-250')
-#filenames.append('outputs/%s/impactPriorPLOPT(7)-f%d-lr-g0.0-%d-500')
+#filenames.append('outputs/%s/impactPriorPLOPT(7)-f%d-lr-g1.0-%d-250')
 #filenames.append(
 #    open(
 #        'outputs/%s/impactPriorOPT-S(2)-f%d-lr-g1.0-%d-250' % 
@@ -442,21 +443,22 @@ filenames = []
 #filenames.append(open('outputs/g7/uncBayes-f%d-lr-g1.0-1000-250' % feature, 
 #                  'r'))
 
-filenames.append('outputs/%s/unc-r3-f%d-lr-g0.0-%d-100')
-filenames.append('outputs/%s/unc-r5-f%d-lr-g0.0-%d-100')
-filenames.append('outputs/%s/unc-r7-f%d-lr-g0.0-%d-100')
-filenames.append('outputs/%s/unc-r9-f%d-lr-g0.0-%d-100')
-filenames.append('outputs/%s/unc-r11-f%d-lr-g0.0-%d-100')
+#filenames.append('outputs/%s/unc-f%d-lr-g0.0-%d-200')
+#filenames.append('outputs/%s/unc-r3-f%d-lr-g0.0-%d-200')
+#filenames.append('outputs/%s/unc-r5-f%d-lr-g0.0-%d-200')
+#filenames.append('outputs/%s/unc-r7-f%d-lr-g0.0-%d-200')
+#filenames.append('outputs/%s/unc-r9-f%d-lr-g0.0-%d-200')
+#filenames.append('outputs/%s/unc-r11-f%d-lr-g0.0-%d-200')
 
 #filenames.append('outputs/%s/unc-f%d-lr-g1.0-%d-250')
 #filenames.append('outputs/%s/unc-f%d-lr-g1.0-%d-192')
 
-filenames.append('outputs/%s/unc-f%d-lr-g0.0-%d-100')
-#filenames.append('outputs/%s/unc-f%d-lr-g0.0-%d-250')
+#filenames.append('outputs/%s/unc-f%d-lr-g0.0-%d-100')
+#filenames.append('outputs/%s/unc-f%d-lr-g1.0-%d-250')
 
-filenames.append('outputs/%s/pass-f%d-lr-g0.0-%d-100')
-#filenames.append('outputs/%s/passAll-f%d-lr-g1.0-%d-250')
-
+#filenames.append('outputs/%s/pass-f%d-lr-g1.0-%d-250')
+filenames.append('outputs/%srelex-t3-r0-chris_data_exp_2000/passAll-f%d-lr-g0.0-%d-100')
+filenames.append('outputs/%srelexN-t3-r0-chris_data_exp_2000/passAll-f%d-lr-g0.0-%d-100')
 
 
 
@@ -484,20 +486,29 @@ strategyNames = []
 #strategyNames.append(r'$US^{0.7}_{X}$')
 #strategyNames.append(r'$US^{0.9}_{X}$')
 
-strategyNames.append(r'$US^{2/3}_{X_U}$')
-strategyNames.append(r'$US^{3/5}_{X_U}$')
-strategyNames.append(r'$US^{4/7}_{X_U}$')
-strategyNames.append(r'$US^{5/9}_{X_U}$')
-strategyNames.append(r'$US^{6/11}_{X_U}$')
+#strategyNames.append(r'$US^{2/3}_{X_U}$')
+#strategyNames.append(r'$US^{3/5}_{X_U}$')
+#strategyNames.append(r'$US^{4/7}_{X_U}$')
+#strategyNames.append(r'$US^{5/9}_{X_U}$')
+#strategyNames.append(r'$US^{6/11}_{X_U}$')
+
+#strategyNames.append(r'$US^{1/1}$')
+#strategyNames.append(r'$US^{2/3}$')
+#strategyNames.append(r'$US^{3/5}$')
+#strategyNames.append(r'$US^{4/7}$')
+#strategyNames.append(r'$US^{5/9}$')
+#strategyNames.append(r'$US^{6/11}$')
 
 #strategyNames.append('impactPLOPT(7)')
-strategyNames.append(r'$US_{X_U}$')
+#strategyNames.append(r'$US_{X_U}$')
 #strategyNames.append(r'$US^*_{X_U}$')
 
 #strategyNames.append(r'$US^5_{X_U}$')
 #strategyNames.append(r'$US^{17}_{X_U}$')
-strategyNames.append('passive')
-#strategyNames.append('passiveAll')
+#strategyNames.append('passive')
+strategyNames.append('passiveAll')
+strategyNames.append('passiveAllNegative')
+
 #strategyNames.append(r'$US_{X_U}x10$')
 #strategyNames.append('dtvoi-r(7)')
 #strategyNames.append('dtvoi-r(2)')

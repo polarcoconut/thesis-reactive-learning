@@ -25,12 +25,14 @@ from samplingMethodClasses import *
 
 from math import sqrt, floor
 from data.makedata import makeGaussianData, makeTriGaussianData, makeLogicalData, makeUniformData
-from data.makedataClasses import uniformData, gaussianData, triGaussianData, realData, relationExtractionData, galaxyZooData
+from data.makedataClasses import uniformData, gaussianData, triGaussianData, realData, relationExtractionData, galaxyZooData, relationExtractionSeparateData
 from ordereddict import OrderedDict
 
 import cProfile, pstats, StringIO
+import time
 
 
+t0 = time.time()
 pr = cProfile.Profile()
 pr.enable()
 
@@ -45,9 +47,9 @@ if len(sys.argv) > 1:
 
 #These gammas are only used to generate label noise when
 #we do NOT have a list of available labels to sample from.
-#gamma = 1.0 #0.75 accuracy
+gamma = 1.0 #0.75 accuracy
 #gamma = 3.0 #0.56 accuracy
-gamma = 0.0 #perfect accuracy
+#gamma = 0.0 #perfect accuracy
 d = 0.5
 
 print "Accuracy of the workers:"
@@ -90,7 +92,7 @@ numFeatures = 90
 numClasses = 2
 budget = 1000
 #budget = int(sum(1 for line in f) / 2.0)
-numberOfSimulations = 10
+numberOfSimulations = 25
 
 instances = []
 classes = []
@@ -138,14 +140,18 @@ numberTrue = 0
 #                                     symmetric = True, getLastItemLabeled=True)]
 
 #samplingStrategies = [uncertaintySampling()]
+samplingStrategies = [uncertaintySampling(),
+                      uncertaintySamplingUCT(1.0),
+                      uncertaintySamplingUCT(0.5),
+                      uncertaintySamplingUCT(0.1)]
 
-samplingStrategies = [uncertaintySamplingRelabel(3),
-                      uncertaintySamplingRelabel(5),
-                      uncertaintySamplingRelabel(7),
-                      uncertaintySamplingRelabel(9),
-                      uncertaintySamplingRelabel(11),
-                      uncertaintySampling(),
-                      passive()]
+
+#samplingStrategies = [uncertaintySamplingRelabel(3),
+#                      uncertaintySamplingRelabel(5),
+#                      uncertaintySamplingRelabel(7),
+#                      uncertaintySamplingRelabel(9),
+#                      uncertaintySamplingRelabel(11),
+#                      uncertaintySampling()]
 
 #samplingStrategies = [uncertaintySamplingRelabel(3)]
 #samplingStrategies = [uncertaintySamplingRelabel(5)]
@@ -362,11 +368,16 @@ samplingStrategies = [neighbor6,
 #                      neighbor5,
 #                      neighbor6]
 
+#THIS IS IMPACTPLOPT(7)
 #samplingStrategies = [uncertaintySampling(),
 #                      passive(),
 #                      neighbor3]
 
+#samplingStrategies = [uncertaintySampling()]
 #samplingStrategies = [passive()]
+#samplingStrategies = [neighbor3]
+
+#samplingStrategies = [passiveAll()]
 
 #samplingStrategies = [uncertaintySampling(),
 #                      passive()]
@@ -386,28 +397,40 @@ samplingStrategies = [neighbor6,
 
 #samplingStrategies = [uncertaintySamplingAlpha(0.9)]
 
-
+#samplingStrategies = [passiveAddNegative(1, False)]
+#samplingStrategies = [passiveAddNegative(1, True)]
 
 numRelabels = 4
 activeLearningExamples = 50
 
 
 #dataGenerator = uniformData(budget*2, numFeatures)
-#dataGenerator = gaussianData(budget*2, numFeatures)
+dataGenerator = gaussianData(budget*2, numFeatures)
 #dataGenerator = triGaussianData(budget*2, numFeatures)
 #dataGenerator = realData(budget * 2, numFeatures, f, realDataName)
 
 #MULTIPLY BUDGET by 10 when balancing classes
-dataGenerator = relationExtractionData(budget+900, numFeatures = 1, 
-                                       relInd = 2, pruningThres = 1,
-                                       balanceClasses = False,
-                                       usePerfect = False)
+#dataGenerator = relationExtractionData(budget+900, numFeatures = 1, 
+#                                       relInd = 0, pruningThres = 3,
+#                                       balanceClasses = False,
+#                                       usePerfect = False,
+#                                       useNegative = False)
+
+#dataGenerator = relationExtractionData(2000, numFeatures = 1, 
+#                                       relInd = 1, pruningThres = 1,
+#                                       balanceClasses = False,
+#                                       usePerfect = False)
 
 #dataGenerator = galaxyZooData(budget+1000, numFeatures = 1, 
 #                              classInd = 0,
 #                              usePerfect = True,
 #                              sdss = True)
 
+
+#dataGenerator = relationExtractionSeparateData(budget+900, numFeatures = 1, 
+#                                       relInd = 0, pruningThres = 3,
+#                                       balanceClasses = False,
+#                                       usePerfect = False)
 
 accuracyfiles = []
 fscorefiles = []
@@ -1352,6 +1375,10 @@ sortby = 'cumulative'
 ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
 ps.print_stats()
 print s.getvalue()
+t1 = time.time()
+
+print "TOTAL TIME TOOK"
+print t1-t0
 
 print "All Accuracies:"
 for (i, samplingStrategy) in zip(range(len(samplingStrategies)),

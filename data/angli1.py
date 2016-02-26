@@ -121,7 +121,9 @@ def getTestAndGoldData(testFile, allFeatures, relId):
 def getTrainingData_2(trainingFile, relInd, allFeatures, responses):
 	num = getLen(trainingFile)
 	lenFeatures = len(allFeatures)
-
+        print "training file has this many rows"
+        print num
+        
 	# generate class expression
 	relation = ['per:origin', '/people/person/place_of_birth', '/people/person/place_lived', '/people/deceased_person/place_of_death', 'travel', 'NA']
 
@@ -129,6 +131,7 @@ def getTrainingData_2(trainingFile, relInd, allFeatures, responses):
 	X_train = lil_matrix((num, lenFeatures), dtype=np.int8)
 
         exampleIds = {}
+        sentenceToExample = {}
 	ctr = 0
 	with open(trainingFile) as f:
 		for row in f:
@@ -138,6 +141,7 @@ def getTrainingData_2(trainingFile, relInd, allFeatures, responses):
 			# the training file is already binary
 			rel = parts[7]
                         exampleId = parts[6]
+                        sentence = parts[11]
                         if exampleId not in responses:
                                 continue
 			if rel == relation[relInd]:
@@ -156,9 +160,11 @@ def getTrainingData_2(trainingFile, relInd, allFeatures, responses):
                                 exampleIds[key] = []
                         exampleIds[key].append(exampleId)
 			ctr += 1
-
+                        sentenceToExample[sentence] = key
+                        
 	print "Training Data Ready"
-	return y_train, X_train, exampleIds
+        print len(exampleIds)
+	return y_train, X_train, exampleIds, sentenceToExample
 
 
 # training a binary classifier

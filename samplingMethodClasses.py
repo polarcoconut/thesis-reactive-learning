@@ -33,6 +33,26 @@ class uncertaintySampling(samplingMethod):
         (p, index) = getMostUncertainTask(tasks, classifier)
         return tasks[index]
 
+class uncertaintySamplingUCT(samplingMethod):
+
+    def __init__(self, c=1.0):
+        self.c = c
+
+    def reinit(self):
+        pass
+
+    def getName(self):
+        return 'uncUCT%.1f' % self.c
+
+    def sample(self, dataGenerator, state, classifier, accuracy):
+        retrain(state, classifier, True, accuracy)
+        tasks = dataGenerator.trainingTasks
+        nonActiveTasks = state.keys()
+        nonActiveTasks.remove(-1)
+        allTasks = tasks + nonActiveTasks
+
+        return getMostUncertainTaskUCT(state, allTasks, classifier, self.c)
+
 class uncertaintySamplingLabeled(samplingMethod):
 
     def __init__(self):
@@ -173,10 +193,19 @@ class impactSampling(samplingMethod):
 
 
                 else:
+                    #IF NO OPTIMISM HERE, THEN WE ARE ASSUMING WE KNOW GAMMA
+                    """
                     baseStrategyChange = getChangeInClassifier(
                         allTasks, state, classifier, accuracy, baseStrategyTask,
                         optimism = self.optimism,
                         numBootstrapSamples = self.numBootstrapSamples)
+                    """
+
+                    baseStrategyChange = getChangeInClassifier(
+                        allTasks, state, classifier, accuracy, baseStrategyTask,
+                        optimism = False,
+                        numBootstrapSamples = self.numBootstrapSamples)
+
 
 
             print baseStrategy
@@ -322,24 +351,6 @@ class passive(samplingMethod):
         return sample(dataGenerator.trainingTasks, 1)[0]
 
 
-class passive(samplingMethod):
-
-    def __init__(self):
-        pass
-
-    def reinit(self):
-        pass
-
-    def getName(self):
-        return 'pass'
-
-    def sample(self, dataGenerator, state, classifier, accuracy):
-        #activeTaskIndices.remove(len(activeTaskIndices)- 1)
-        #return activeTaskIndices[len(activeTaskIndices)-1]
-        #return activeTaskIndices.pop(-1)
-        return sample(dataGenerator.trainingTasks, 1)[0]
-
-
 class passiveAll(samplingMethod):
 
     def __init__(self):
@@ -358,7 +369,54 @@ class passiveAll(samplingMethod):
         allTasks = tasks + nonActiveTasks
 
         return sample(allTasks, 1)[0]
+    
 
+    
+class passiveAddNegative(samplingMethod):
+
+    def __init__(self, numNegativesPerPositive = 1, curated=False):
+        self.curated = curated
+        self.numNegativesPerPositive = numNegativesPerPositive
+
+        self.currentNegativeCount = 0
+        self.currentPositiveExample = None
+        
+    def reinit(self):
+        self.currentNegativeCount = 0
+        self.currentPositiveExample = None
+        
+    def getName(self):
+        if self.curated:
+            return 'passNegCur'
+        else:
+            return 'passNegRan'
+
+    def sample(self, dataGenerator, state, classifier, accuracy):
+        if self.currentNegativeCount == self.numNegativesPerPositive:
+            tasks = dataGenerator.trainingTasksPositive
+            task = sample(tasks, 1)[0]
+            self.currentPositiveExample = task
+            return task
+        else:
+            if self.curated:
+                if (self.currentPositiveExample not in
+                    dataGenerator.trainingTasksNegativeCurated):
+                    tasks = dataGenerator.trainingTasksNegativeRandom
+                    task = sample(tasks, 1)[0]
+                    dataGenerator.trainingTasksNegativeRandom.remove(task)
+                else:
+                    tasks = dataGenerator.trainingTasksNegativeCurated[
+                        self.currentPositiveExample]
+                    task = sample(tasks, 1)[0]
+                    dataGenerator.trainingTaskNegativeCurated[
+                        self.currentPositiveExample].remove(task)
+            else:
+                tasks = dataGenerator.trainingTasksNegativeRandom
+                task = sample(tasks, 1)[0]
+                dataGenerator.trainingTasksNegativeRandom.remove(task)
+                
+            self.currentNegativeCount += 1
+            return task
 
 #This is not passive. This is randomly choosing between two points.
 class randomSampling(samplingMethod):

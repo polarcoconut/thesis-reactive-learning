@@ -1,4 +1,4 @@
-from math import log
+from math import log, sqrt
 from random import sample
 from numpy import dot, linalg
 from numpy.random import randint
@@ -683,7 +683,7 @@ def getAllUncertainties(examples, classifier):
     return entropies
 
 def getMostUncertainTask(tasks, classifier):
-    highestUncertainty = -21930123123
+    highestUncertainty = float('-inf')
     highestEntropyDistribution = None
     mostUncertainTaskIndices = []
     mustUncertainTasks = []
@@ -713,6 +713,44 @@ def getMostUncertainTask(tasks, classifier):
     return (classifier.predict_proba([mostUncertainTask])[0], 
             mostUncertainTaskIndex)
 
+
+def getMostUncertainTaskUCT(state, tasks, classifier, c):
+    highestUncertainty = float('-inf')
+    highestEntropyDistribution = None
+    mostUncertainTaskIndices = []
+    mustUncertainTasks = []
+
+    entropies = getAllUncertainties(tasks, classifier)
+
+    totalLabels = 0.0
+    for task in tasks:
+        if task in state:
+            totalLabels += (state[task][0] + state[task][1])
+    totalLabels = log(totalLabels)
+    
+    for (i, uncertainty) in zip(range(len(tasks)), entropies):
+        task = tasks[i]
+        numLabels = 1
+        if task in state:
+            numLabels += (state[task][0] + state[task][1])
+
+        uncertainty += c * sqrt(totalLabels / numLabels)
+        
+        if uncertainty > highestUncertainty:
+            mostUncertainTaskIndices = [i]
+            mostUncertainTasks = [task]
+            highestUncertainty = uncertainty
+        elif uncertainty == highestUncertainty:
+            mostUncertainTaskIndices.append(i)
+            mostUncertainTasks.append(task)
+
+    j = randint(len(mostUncertainTasks))
+    mostUncertainTaskIndex = mostUncertainTaskIndices[j]
+    mostUncertainTask = mostUncertainTasks[j]
+
+    return mostUncertainTask
+    #return (classifier.predict_proba([mostUncertainTask])[0], 
+    #        mostUncertainTaskIndex)
 
 def getTotalUncertainty(examples, classifier):
 

@@ -9,6 +9,8 @@ import difflib
 from string import printable
 from logisticRegression import LRWrapper
 from scipy.stats import spearmanr, pearsonr
+import pprint
+import difflib
 
 class dataGenerator:
     def __init__(self, numExamples, numFeatures, pool = True):
@@ -288,7 +290,8 @@ class galaxyZooData(dataGenerator):
 class relationExtractionData(dataGenerator):
     def __init__(self, numExamples, numFeatures, relInd, pruningThres,
                  balanceClasses = False,
-                 pool = True, usePerfect = False):
+                 pool = True, usePerfect = False,
+                 useNegative = False):
         dataGenerator.__init__(self,numExamples, numFeatures, pool)
         self.relInd = relInd
         self.pruningThres = pruningThres
@@ -296,29 +299,65 @@ class relationExtractionData(dataGenerator):
         self.negativeExample = None
         self.balanceClasses = balanceClasses
         self.usePerfect = usePerfect
+        self.useNegative = useNegative
+        self.trainingFileBase = 'data/relex/chris_data_exp_2000'
+        self.trainingFileBase2 = 'chris_data_exp_2000'
+        #self.trainingDataFile = 'data/relex/chris_data_exp_2000'
+        #self.crowdDataFile = open('data/relex/crowd_data_2000', 'r')
+
         #self.generateData()
 
     def getName(self):
         if self.balanceClasses:
-            if self.usePerfect:
-                return "relexBP-t%d-r%d" % (self.pruningThres, self.relInd)
+            if self.useNegative:
+                return "relexBN-t%d-r%d-%s" % (
+                    self.pruningThres, self.relInd, self.trainingFileBase2)
             else:
-                return "relexB-t%d-r%d" % (self.pruningThres, self.relInd)
+                return "relexB-t%d-r%d-%s" % (
+                    self.pruningThres, self.relInd, self.trainingFileBase2)
         else:
-            if self.usePerfect:
-                return "relexP-t%d-r%d" % (self.pruningThres, self.relInd)
+            if self.useNegative:
+                return "relexN-t%d-r%d-%s" % (
+                    self.pruningThres, self.relInd, self.trainingFileBase2)
             else:
-                return "relex-t%d-r%d" % (self.pruningThres, self.relInd)
+                return "relex-t%d-r%d-%s" % (
+                    self.pruningThres, self.relInd, self.trainingFileBase2)
 
     def generateData(self):
-        trainingDataFile = 'data/relex/chris_data_exp_2000'
-        crowdDataFile = open('data/relex/crowd_data_2000', 'r')
+
+        relations = ['per:origin', '/people/person/place_of_birth',
+                     '/people/person/place_lived',
+                     '/people/deceased_person/place_of_death', 'travel', 'NA']
+
+        #This is the file with the features
+        trainingDataFile = self.trainingFileBase + '_features'
+
+        #This is the file with the crowd data
+        crowdDataFile = open(self.trainingFileBase + '_crowd', 'r')
 
         #trainingDataFile = 'data/combGaborOur_CS_and_test'
         #crowdDataFile = open('data/crowdData', 'r')
 
+        #Extra negative data
+        negativeDataFile= 'data/relex/Batch_2193281_batch_results_angliformat_features.csv'
+        
+
         testDataFile = 'data/test_strict_new_feature'
 
+
+ 
+        if self.useNegative:
+            concatenatedFile = 'temp_file_made_by_relex_generateData'
+            with open(concatenatedFile, 'w') as fh_concatenatedFile:
+                with open(trainingDataFile) as fh_trainingDataFile:
+                    fh_concatenatedFile.write(fh_trainingDataFile.read())
+                with open(negativeDataFile) as fh_negativeDataFile:
+                    for line in fh_negativeDataFile:
+                        if not line[7] == relations[self.relInd]:
+                            continue
+                        fh_concatenatedFile.write(line)
+                    
+            trainingDataFile = concatenatedFile
 
         allFeatures = getFeatures(trainingDataFile, self.pruningThres)
 
@@ -348,8 +387,25 @@ class relationExtractionData(dataGenerator):
                     self.responses[sentenceId].append(1)                    
                 currentTokenIndex += 2
 
+
+        if self.useNegative:
+            for line in open(negativeDataFile, 'r'):
+                line = line.split('\t')
+                numTokens = len(line)
+                if numTokens < 2:
+                    continue
+                sentenceId = line[6]
+                relation = line[7]
+
+                if not relation == relations[self.relInd]:
+                    continue
+                
+                self.responses[sentenceId] = [0]
+
+            
         (labels, examples, exampleIds) = getTrainingData_2(
             trainingDataFile, self.relInd, allFeatures, self.responses)
+            
         (testlabels, testexamples) = getTestAndGoldData(
             testDataFile, allFeatures, self.relInd)
 
@@ -474,6 +530,327 @@ class relationExtractionData(dataGenerator):
         #Real data can't be replenished
         pass
 
+
+#negatives and positives are separated out.
+class relationExtractionSeparateData(dataGenerator):
+    def __init__(self, numExamples, numFeatures, relInd, pruningThres,
+                 balanceClasses = False,
+                 pool = True, usePerfect = False):
+        dataGenerator.__init__(self,numExamples, numFeatures, pool)
+        self.relInd = relInd
+        self.pruningThres = pruningThres
+        self.positiveExample = None
+        self.negativeExample = None
+        self.balanceClasses = balanceClasses
+        self.usePerfect = usePerfect
+        self.trainingFileBase = 'data/relex/chris_data_exp_2000'
+        self.trainingFileBase2 = 'chris_data_exp_2000'
+        #self.trainingDataFile = 'data/relex/chris_data_exp_2000'
+        #self.crowdDataFile = open('data/relex/crowd_data_2000', 'r')
+
+        self.trainingTasksPositive = None
+        self.trainingTasksNegative = None
+        #self.generateData()
+
+    def getName(self):
+        if self.balanceClasses:
+            return "relexB-t%d-r%d-%s" % (
+                self.pruningThres, self.relInd, self.trainingFileBase2)
+        else:
+            return "relex-t%d-r%d-%s" % (
+                self.pruningThres, self.relInd, self.trainingFileBase2)
+
+    def generateData(self):
+
+        relations = ['per:origin', '/people/person/place_of_birth',
+                     '/people/person/place_lived',
+                     '/people/deceased_person/place_of_death', 'travel', 'NA']
+
+        #This is the file with the features
+        trainingDataFile = self.trainingFileBase + '_features'
+
+        #This is the file with the crowd data
+        crowdDataFile = open(self.trainingFileBase + '_crowd', 'r')
+
+        #trainingDataFile = 'data/combGaborOur_CS_and_test'
+        #crowdDataFile = open('data/crowdData', 'r')
+
+        #Extra negative data
+        negativeDataFile= 'data/relex/Batch_2193281_batch_results_angliformat_features.csv'
+        
+
+        #Map from positive to negative data
+        negativeDataMapFile = 'data/relex/Batch_2193281_batch_results_mapToOriginal.csv'
+        negativeDataMap = {}
+        negativeDataMapInverse = {}
+        
+        testDataFile = 'data/test_strict_new_feature'
+
+
+        negativeSentenceMap = {}
+ 
+        concatenatedFile = 'temp_file_made_by_relex_generateData'
+        with open(concatenatedFile, 'w') as fh_concatenatedFile:
+            with open(trainingDataFile) as fh_trainingDataFile:
+                fh_concatenatedFile.write(fh_trainingDataFile.read())
+            with open(negativeDataFile) as fh_negativeDataFile:
+                for line in fh_negativeDataFile:
+                    if not line[7] == relations[self.relInd]:
+                        continue
+                    fh_concatenatedFile.write(line)
+                    
+        trainingDataFile = concatenatedFile
+
+        allFeatures = getFeatures(trainingDataFile, self.pruningThres)
+
+        self.responses = {}
+        for line in crowdDataFile:
+            line = line.split('\t')
+            numTokens = len(line)
+            if numTokens < 2:
+                continue
+            sentenceId = line[6]
+            #self.responses[sentenceId] = {}
+            currentTokenIndex = 7
+
+            #If I wanted to do laplace smoothing, I would do that here.
+            self.responses[sentenceId] = []
+
+            while currentTokenIndex < numTokens -1:
+                #print currentTokenIndex
+                #print numTokens
+                workerId = line[currentTokenIndex]
+                workerResponse = line[currentTokenIndex + 1].split(',')
+                workerResponse = workerResponse[self.relInd]
+                if 'neg' in workerResponse:
+                    self.responses[sentenceId].append(0)
+                else:
+                    self.responses[sentenceId].append(1)                    
+                currentTokenIndex += 2
+
+
+        for line in open(negativeDataMapFile, 'r'):
+            line = line.split('\t')
+            oldSentence = line[0]
+            newSentence = line[1].rstrip('\n')
+            if oldSentence not in negativeDataMap:
+                negativeDataMap[oldSentence] = []
+            negativeDataMap[oldSentence].append(newSentence)
+            negativeDataMapInverse[newSentence] = oldSentence
+
+        #pprint.pprint(negativeDataMapInverse.keys())
+        #print sorted(negativeDataMapInverse.keys())
+        
+        for line in open(negativeDataFile, 'r'):
+            line = line.split('\t')
+            numTokens = len(line)
+            if numTokens < 2:
+                continue
+            sentenceId = line[6]
+            relation = line[7]
+
+            if not relation == relations[self.relInd]:
+                continue
+                
+            self.responses[sentenceId] = [0]
+            negativeSentenceMap[sentenceId]  = line[11]
+
+        for value in negativeSentenceMap.values():
+            if value not in negativeDataMapInverse:
+                print value
+                print difflib.get_close_matches(value, negativeDataMapInverse.keys(), 1)
+            
+        (labels, examples, exampleIds, sentenceToExample) = getTrainingData_2(
+            trainingDataFile, self.relInd, allFeatures, self.responses)
+
+        (curated_negative_labels, curated_negative_examples,
+         curated_negative_exampleIds,
+         curated_negative_sentenceToExample) = getTrainingData_2(
+            negativeDataFile, self.relInd, allFeatures, self.responses)
+
+        (testlabels, testexamples) = getTestAndGoldData(
+            testDataFile, allFeatures, self.relInd)
+
+        #print exampleIds.keys()[0:2]
+        examples = examples.toarray()
+        testexamples = testexamples.toarray()
+        curated_negative_examples = curated_negative_examples.toarray()
+        
+        #data = zip(examples, labels)
+        examples = sample(examples, self.numExamples)
+        shuffle(examples)
+        print "Examples shuffled"
+        print "Total number of examples"
+        print len(examples)
+        #unshuffledData = zip(*data)
+
+        
+        self.oldTrainingTasks=[]
+        self.oldTrainingTasksPositive = []
+        self.oldTrainingTasksNegativeCurated = {}
+        self.oldTrainingTasksNegativeRandom = []
+        
+        self.oldTrainingTaskClasses = {}
+
+        print len(curated_negative_exampleIds.keys())
+        print len(curated_negative_examples)
+        curated_negative_examples_temp = []
+        for curated_negative_example in curated_negative_examples:
+            curated_negative_examples_temp.append(
+                tuple(curated_negative_example))
+        curated_negative_examples = curated_negative_examples_temp
+        for curated_negative_example in curated_negative_examples:        
+            negative_exampleId = curated_negative_exampleIds[
+                curated_negative_example][0]
+            print negative_exampleId
+            print len(negativeDataMapInverse)
+            print len(sentenceToExample)
+            print negativeSentenceMap[negative_exampleId]
+            print negativeDataMapInverse.keys()[0]
+            print negativeDataMapInverse[negativeDataMapInverse.keys()[0]]
+            corresponding_positive_sentence = negativeDataMapInverse[
+                negativeSentenceMap[negative_exampleId]]
+            if  corresponding_positive_sentence not in sentenceToExample:
+                print corresponding_positive_sentence
+                print sentenceToExample.keys()[0]
+                print difflib.get_close_matches(corresponding_positive_sentence,
+                                            sentenceToExample.keys(), 1)
+            corresponding_positive_sentence_example = sentenceToExample[
+                corresponding_positive_sentence]
+            self.oldTrainingTasksNegativeCurated[
+                corresponding_positive_sentence_example]
+            if (corresponding_positive_sentence_example not in
+                self.oldTrainingTasksNegativeCurated):
+                self.oldTrainingTasksNegativeCurated[
+                    corresponding_positive_sentence_example] = []
+            self.oldTrainingTasksNegativeCurated[
+                corresponding_positive_sentence_example].append(
+                    curated_negative_example)
+            self.oldTrainingTaskClasses[curated_negative_example] = [0]
+            
+        i = 0
+        for example in examples:
+            if i % 1000 == 0:
+                print i
+            self.oldTrainingTasks.append(tuple(example))
+            i += 1
+        for trainingTask in self.oldTrainingTasks:
+            if trainingTask in self.oldTrainingTaskClasses:
+                continue
+            self.oldTrainingTaskClasses[trainingTask] = []
+            for exampleId in exampleIds[trainingTask]:
+                self.oldTrainingTaskClasses[
+                    trainingTask] += self.responses[exampleId]
+
+            aggregatedLabel = max(
+                set(self.oldTrainingTaskClasses[trainingTask]),
+                key=self.oldTrainingTaskClasses[trainingTask].count)
+            self.oldTrainingTaskClasses[trainingTask] = [aggregatedLabel]
+            if aggregatedLabel == 1:
+                self.oldTrainingTasksPositive.append(trainingTask)
+            else:
+                oldTrainingTasksNegativeRandom.append(trainingTask)
+
+        """
+        print "Computing the entropy in each feature"
+        numFeatures = len(self.oldTrainingTasks[0])
+        averageEntropy = 0.0
+        for i in range(numFeatures):
+            entropy0 = 1.0
+            entropy1 = 1.0
+            for trainingTask in self.oldTrainingTasks:
+                if trainingTask[i] == 0:
+                    entropy0 += 1
+                else:
+                    entropy1 += 1
+            normalizer = entropy0 + entropy1
+            entropy0 = entropy0 / normalizer
+            entropy1 = entropy1 / normalizer
+            entropy = -1* ((entropy0 * log(entropy0)) + 
+                           (entropy1 * log(entropy1)))
+            averageEntropy += entropy
+            if entropy1 > 0.5:
+                print (entropy0, entropy1, entropy)
+        averageEntropy /= numFeatures
+        print averageEntropy
+        """
+
+        if self.balanceClasses:        
+            print "Computing Skew in Training Data"
+            numPositiveExamples = 0.0
+            numNegativeExamples = 0.0
+            classMajorityVotes = {}
+            for trainingTask in self.oldTrainingTasks:
+                counter = 0
+                for label in self.oldTrainingTaskClasses[trainingTask]:
+                    if label == 1:
+                        counter += 1
+                    else:
+                        counter -= 1
+                if counter > 0:
+                    numPositiveExamples += 1
+                    classMajorityVotes[trainingTask] = 1
+                else:
+                    numNegativeExamples += 1
+                    classMajorityVotes[trainingTask] = 0
+
+            print numPositiveExamples / len(self.oldTrainingTasks)
+            print numNegativeExamples / len(self.oldTrainingTasks)
+
+            print "Balancing the Training Set"
+            newNumPositiveExamples = 0.0
+            newNumNegativeExamples = 0.0
+            newTrainingTasks = []
+            for trainingTask in self.oldTrainingTasks:
+                if (newNumPositiveExamples == numPositiveExamples and
+                    newNumNegativeExamples == numNegativeExamples):
+                    break
+                if (classMajorityVotes[trainingTask] == 1  and
+                    newNumPositiveExamples < numPositiveExamples):
+                    newTrainingTasks.append(trainingTask)
+                    newNumPositiveExamples += 1
+                if (classMajorityVotes[trainingTask] == 0  and
+                    newNumNegativeExamples < numPositiveExamples):
+                    newTrainingTasks.append(trainingTask)
+                    newNumNegativeExamples += 1
+
+            self.oldTrainingTasks = newTrainingTasks
+
+            print newNumPositiveExamples
+            print newNumNegativeExamples
+            print "Done balancing the training set"
+            print "The size of the training set is"
+            print len(self.oldTrainingTasks)
+
+        self.oldTrainingTaskDifficulties = [
+            0.5 for i in range(self.numTrainingTasks)]
+
+        self.oldValidationTasks = []
+        self.oldValidationTaskClasses = []
+        
+        self.oldTestingTasks = []
+        for testexample in testexamples:
+            self.oldTestingTasks.append(tuple(testexample))
+        self.oldTestingTaskClasses = testlabels
+
+        print "Duplicating the data"
+        self.generateDuplicateData()
+
+        print "Data Ready"
+
+    def generateDuplicateData():
+        super(relationExtractionSeparateData, self).generateDuplicateData()
+        self.trainingTasksPositive = deepcopy(self.oldTrainingTasksPositive)
+        self.trainingTasksNegativeCurated = deepcopy(
+            self.oldTrainingTasksNegativeCurated)
+        self.trainingTasksNegativeRandom = deepcopy(
+            self.oldTrainingTasksNegativeRandom)
+        
+    def replenish(self):
+        #Real data can't be replenished
+        pass
+    
+    
     
 class realData(dataGenerator):
     def __init__(self, numExamples, numFeatures, 
@@ -502,8 +879,11 @@ class realData(dataGenerator):
             
             if int(line[numFeatures]) == 1:
                 numberTrue += 1
-                
+
+        print "Number True"
         print numberTrue
+        print "Number Total"
+        print len(instances)
         data = zip(instances, classes)
         shuffle(data)
         unshuffledData = zip(*data)
