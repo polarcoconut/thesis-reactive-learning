@@ -403,7 +403,7 @@ class relationExtractionData(dataGenerator):
                 self.responses[sentenceId] = [0]
 
             
-        (labels, examples, exampleIds) = getTrainingData_2(
+        (labels, examples, exampleIds, sentence_to_example) = getTrainingData_2(
             trainingDataFile, self.relInd, allFeatures, self.responses)
             
         (testlabels, testexamples) = getTestAndGoldData(

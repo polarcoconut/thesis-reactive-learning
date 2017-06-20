@@ -24,7 +24,7 @@ from execLoops import *
 from samplingMethodClasses import *
 
 from math import sqrt, floor
-from data.makedata import makeGaussianData, makeTriGaussianData, makeLogicalData, makeUniformData
+#from data.makedata import makeGaussianData, makeTriGaussianData, makeLogicalData, makeUniformData
 from data.makedataClasses import uniformData, gaussianData, triGaussianData, realData, relationExtractionData, galaxyZooData, relationExtractionSeparateData
 from ordereddict import OrderedDict
 

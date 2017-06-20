@@ -15,7 +15,8 @@ THIS CODE IS RESEARCH CODE and thus, horrible code.
 
 ## Run instructions 
 - If you wish to use a non-synthetic dataset, first copy the desired dataset into the data folder.
-- Modify settings in `simulate.py` to pick the dataset and the re-active learning algorithms you want to use
+- Modify settings in `simulate.py` to pick the dataset and the re-active learning algorithms you want to use, as well as other settings like total budget, and worker accuracy.
+- Create a folder named `outputs` and inside this folder, create a folder whose name is what `folderName` is on line 441 of `simulate.py`.
 - Run `./runsim.sh` or `python simulate.py`
 - Results are output to the `outputs` folder.
 
