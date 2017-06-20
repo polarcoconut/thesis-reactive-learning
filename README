@@ -7,7 +7,7 @@ This repository contains code that can be used to reproduce results found in
 
 -Christopher H. Lin, Mausam, and Daniel S. Weld. "To Re(label), or Not To Re(label)." In Proceedings of the 2nd AAAI Conference on Human Computation and Crowdsourcing (HCOMP). Pittsburgh, PA, USA. Nov 2014. 
 
-THIS CODE IS RESEARCH CODE and thus, horrible code. 
+THIS CODE IS RESEARCH CODE and thus, horrible code. USE AT YOUR OWN RISK.
 
 ## Development configuration
 - Dependencies: see requirements.txt
