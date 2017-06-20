@@ -1,0 +1,25 @@
+Re-active Learning
+==============
+
+This repository contains code that can be used to reproduce results found in
+
+-Christopher H. Lin, Mausam, and Daniel S. Weld. "Re-active Learning: Active Learning with Relabeling." In Proceedings of the 30th AAAI Conference on Artificial Intelligence (AAAI). Phoenix, Arizona. February 2016. 
+
+-Christopher H. Lin, Mausam, and Daniel S. Weld. "To Re(label), or Not To Re(label)." In Proceedings of the 2nd AAAI Conference on Human Computation and Crowdsourcing (HCOMP). Pittsburgh, PA, USA. Nov 2014. 
+
+THIS CODE IS RESEARCH CODE and thus, horrible code. 
+
+## Development configuration
+- Dependencies: see requirements.txt
+
+
+## Run instructions 
+- If you wish to use a non-synthetic dataset, first copy the desired dataset into the data folder.
+- Modify settings in `simulate.py` to pick the dataset and the re-active learning algorithms you want to use
+- Run `./runsim.sh` or `python simulate.py`
+- Results are output to the `outputs` folder.
+
+
+## Data Sets
+- We only provide the relation extraction data and the code to generate synthetic data. Other datasets can be found at the UCI Machine Learning Repository.
+
