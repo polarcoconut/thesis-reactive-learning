@@ -4,9 +4,6 @@ import numpy as np
 import sys, os, traceback
 
 from random import sample, random, randint
-from MDP import *
-from SimpleMDP import *
-from SimpleMDP2 import *
 from logisticRegression import *
 from svm import *
 from dt import *
