@@ -13,8 +13,6 @@ from perceptron import *
 from mnb import *
 from sgd import *
 
-from uct import *
-from uct2 import *
 from utils import *
 from execLoops import *
 from samplingMethodClasses import *
