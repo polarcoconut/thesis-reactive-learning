@@ -17,7 +17,6 @@ from uct import *
 from uct2 import *
 from utils import *
 from execLoops import *
-#from samplingMethods import *
 from samplingMethodClasses import *
 
 from math import sqrt, floor
