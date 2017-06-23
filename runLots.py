@@ -5,9 +5,6 @@ import cPickle as pickle
 import sys,os
 
 from random import sample, random, randint, shuffle
-from MDP import *
-from SimpleMDP import *
-from SimpleMDP2 import *
 #from logisticRegression import *
 from svm import *
 from dt import *
