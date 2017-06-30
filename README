@@ -21,6 +21,8 @@ THIS CODE IS RESEARCH CODE and thus, horrible code. USE AT YOUR OWN RISK.
 - Results are output to the `outputs` folder.
 
 
+- If you want to assume knowledge of worker accuracy, then you must comment out lines 198 to 201 and uncomment lines 204-209  in samplingMethodClasses.py.
+
 ## Data Sets
 - We only provide the relation extraction data and the code to generate synthetic data. Other datasets can be found at the UCI Machine Learning Repository.
 
